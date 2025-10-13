@@ -12,14 +12,17 @@ class SimpleConvModel(nn.Module):
         self.conv2 = nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1)
         self.lif2 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(16 * 64 * 64, out_c)
+        self.fc1 = nn.Linear(16 * 64 * 64, 256)
         self.lif3 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
+        self.fc2 = nn.Linear(256, out_c)
+        self.lif4 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
 
     def forward(self, x):
         B, T, C, H, W = x.shape
         mem1 = self.lif1.init_leaky()
         mem2 = self.lif2.init_leaky()
         mem3 = self.lif3.init_leaky()
+        mem4 = self.lif4.init_leaky()
         spk_rec = []
 
         for t in range(T):
@@ -31,8 +34,10 @@ class SimpleConvModel(nn.Module):
             xt = self.flatten(xt)
             xt = self.fc1(xt)
             xt, mem3 = self.lif3(xt, mem3)
+            xt = self.fc2(xt)
+            xt, mem4 = self.lif4(xt, mem4)
             # spk_rec.append(xt)
-            spk_rec.append(mem3)
+            spk_rec.append(mem4)
 
         # out = torch.stack(spk_rec)
         out = torch.stack(spk_rec).mean(dim=0)
