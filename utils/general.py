@@ -6,7 +6,7 @@ import tqdm
 import snntorch as snn
 
 
-def plot_loss(loss_rec, test_loss_rec: list[list]):
+def plot_loss(loss_rec, test_loss_rec: list[list], save_name="loss.png"):
     plt.figure(figsize=(8, 8))
     print(type(loss_rec), type(test_loss_rec))
     # Remove those more than 3 std dev away from mean
@@ -25,9 +25,9 @@ def plot_loss(loss_rec, test_loss_rec: list[list]):
     # plt.ylim(0, 2)
     plt.title("Loss Over Time")
     plt.show()
-    plt.savefig("loss.png")
+    plt.savefig(save_name)
 
-def plot_acc(acc_rec, test_acc_rec: list[list]):
+def plot_acc(acc_rec, test_acc_rec: list[list], save_name="acc.png"):
     plt.figure(figsize=(8,8))
     plt.scatter([i for i in range(len(acc_rec))], acc_rec, marker='x', s=1, color='c', label='Train Acc')
     plt.plot(np.convolve(acc_rec, np.ones(100)/100, mode='valid'), color='blue', label='Train Acc (smoothed)')
@@ -39,11 +39,11 @@ def plot_acc(acc_rec, test_acc_rec: list[list]):
     plt.ylabel("Accuracy")
     plt.title("Accuracy Over Epochs")
     plt.show()
-    plt.savefig("accuracy.png")
+    plt.savefig(save_name)
 
-def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e-4, epochs=10, weight_decay=1e-5):
+def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e-4, epochs=10, weight_decay=0, save_name=None):
     print("Training model...")
-    optimiser = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    optimiser = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     model.to(device)
     print(f"Model training on {device}...")
     model.train()
@@ -63,7 +63,8 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
 
             optimiser.zero_grad()
 
-            spikes, _ = model(inputs)
+            #spikes, _ = model(inputs)
+            spikes = model(inputs)
             loss = loss_fn(spikes, labels.long())
             loss_rec.append(loss.item())
 
@@ -73,7 +74,8 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
             loss.backward()
             optimiser.step()
             
-            preds = spikes.sum(dim=0).argmax(dim=1)
+            #preds = spikes.sum(dim=0).argmax(dim=1)
+            preds = spikes.argmax(dim=1)
             acc = (preds == labels).sum().item() / labels.size(0)
             total_acc += acc
 
@@ -86,9 +88,13 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         test_acc_rec.append(test_acc)
         test_loss_rec.append(np.mean(test_loss))
     print("Training complete.")
-
-    plot_loss(loss_rec, test_loss_rec)
-    plot_acc(acc_rec, test_acc_rec)
+    
+    if save_name is None:
+        plot_loss(loss_rec, test_loss_rec)
+        plot_acc(acc_rec, test_acc_rec)
+    else:
+        plot_loss(loss_rec, test_loss_rec, save_name=save_name+"_loss.png")
+        plot_acc(acc_rec, test_acc_rec, save_name=save_name+"_acc.png")
 
     return model
 
@@ -105,20 +111,22 @@ def test(model, test_dl, device, loss_fn):
         for i, (inputs, labels) in enumerate(pbar):
             labels = labels.to(device).long()
             inputs = inputs.to(device)
-            spikes, mems = model(inputs)
+            #spikes, mems = model(inputs)
+            spikes = model(inputs)
             # one-hot encode labels
             # labels_onehot = torch.zeros(labels.size(0), 2).to(device)
             loss = loss_fn(spikes, labels.long())
             test_loss.append(loss.item())
-            preds = spikes.sum(dim=0).argmax(dim=1)
+            #preds = spikes.sum(dim=0).argmax(dim=1)
+            preds = spikes.argmax(dim=1)
             correct += (preds.squeeze() == labels).sum().item()
             total += labels.size(0)
-            pbar.set_description(f"Test Batch {i+1}, Accuracy: {correct/total:.4f}")
+            pbar.set_description(f"Test Batch {i+1}, Accuracy: {correct/total:.4f}, Loss: {sum(test_loss)/len(test_loss):.4f}")
     accuracy = correct / total
     return accuracy, test_loss
 
 def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
-    fade_map = torch.zeros(frames[0].shape[1:4]) # C x H x W
+    fade_map = torch.zeros(frames[0].shape[1:3]) # H x W
     faded_frames = []
     for f in range(len(frames)):
         faded_frames.append([])
@@ -132,15 +140,10 @@ def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
 
 if __name__ == "__main__":
     # Test event_fade
-    rdm = torch.zeros(3, 2, 3, 3)
-    rdm[0, 0, 0, 0] = 1
-    rdm[1, 0, 0, 0] += 1
-    rdm[0, 1, 0, 0] = 1
+    rdm = torch.randn(100, 2, 32, 32)
     rdm[rdm < 0] = 0
     faded = add_event_fade([rdm], decay=0.9)
     print(rdm.shape)
     print(f"RDM min: {rdm.min()}, max: {rdm.max()}")
     print(faded[0].shape)
     print(f"Faded min: {faded[0].min()}, max: {faded[0].max()}")
-
-    print(faded)
