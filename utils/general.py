@@ -75,8 +75,8 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
             loss.backward()
             optimiser.step()
             
-            # preds = spikes.sum(dim=0).argmax(dim=1)
-            preds = spikes.argmax(dim=1)
+            preds = spikes.sum(dim=0).argmax(dim=1)
+            # preds = spikes.argmax(dim=1)
             acc = (preds == labels).sum().item() / labels.size(0)
             total_acc += acc
 
@@ -118,8 +118,8 @@ def test(model, test_dl, device, loss_fn):
             # labels_onehot = torch.zeros(labels.size(0), 2).to(device)
             loss = loss_fn(spikes, labels.long())
             test_loss.append(loss.item())
-            # preds = spikes.sum(dim=0).argmax(dim=1)
-            preds = spikes.argmax(dim=1)
+            preds = spikes.sum(dim=0).argmax(dim=1)
+            # preds = spikes.argmax(dim=1)
             correct += (preds.squeeze() == labels).sum().item()
             total += labels.size(0)
             pbar.set_description(f"Test Batch {i+1}, Accuracy: {correct/total:.4f}, Loss: {sum(test_loss)/len(test_loss):.4f}")
