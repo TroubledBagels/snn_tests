@@ -28,7 +28,10 @@ class SimpleConvModel(nn.Module):
             # xt, mem2 = self.lif2(xt, mem2)
             spk_rec.append(xt)
 
-        return torch.stack(spk_rec), (mem1, mem2)
+        # out = torch.stack(spk_rec)
+        out = torch.stack(spk_rec).mean(dim=0)
+
+        return out, (mem1, mem2)
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
