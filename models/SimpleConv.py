@@ -37,7 +37,7 @@ class SimpleConvModel(nn.Module):
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SimpleConvModel().to(device)
-    sample = torch.randn(1, 100, 64, 64).to(device)
+    model = SimpleConvModel(1, 5).to(device)
+    sample = torch.randn(32, 100, 1, 64, 64).to(device)
     output = model(sample)
     print(output[0].shape)  # Should print torch.Size([1, 10])
