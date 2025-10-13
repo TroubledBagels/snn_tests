@@ -76,8 +76,8 @@ if __name__ == "__main__":
 
     model = SimpleConvModel(in_c=1, out_c=top_label-bottom_label)
     print(model)
-    # loss_fn = snn.functional.ce_count_loss()
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = snn.functional.ce_count_loss()
+    # loss_fn = nn.CrossEntropyLoss()
     print(f"Using loss function: {loss_fn}")
 
     model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=50, save_name="20")
