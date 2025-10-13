@@ -31,6 +31,7 @@ class SimpleConvModel(nn.Module):
 
         # out = torch.stack(spk_rec)
         out = torch.stack(spk_rec).mean(dim=0)
+        print(out.shape)
 
         return out, (mem1, mem2)
 
