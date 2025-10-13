@@ -63,8 +63,8 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
 
             optimiser.zero_grad()
 
-            #spikes, _ = model(inputs)
-            spikes = model(inputs)
+            spikes, _ = model(inputs)
+            # spikes = model(inputs)
             loss = loss_fn(spikes, labels.long())
             loss_rec.append(loss.item())
 
@@ -74,8 +74,8 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
             loss.backward()
             optimiser.step()
             
-            #preds = spikes.sum(dim=0).argmax(dim=1)
-            preds = spikes.argmax(dim=1)
+            preds = spikes.sum(dim=0).argmax(dim=1)
+            # preds = spikes.argmax(dim=1)
             acc = (preds == labels).sum().item() / labels.size(0)
             total_acc += acc
 
@@ -111,14 +111,14 @@ def test(model, test_dl, device, loss_fn):
         for i, (inputs, labels) in enumerate(pbar):
             labels = labels.to(device).long()
             inputs = inputs.to(device)
-            #spikes, mems = model(inputs)
-            spikes = model(inputs)
+            spikes, mems = model(inputs)
+            # spikes = model(inputs)
             # one-hot encode labels
             # labels_onehot = torch.zeros(labels.size(0), 2).to(device)
             loss = loss_fn(spikes, labels.long())
             test_loss.append(loss.item())
-            #preds = spikes.sum(dim=0).argmax(dim=1)
-            preds = spikes.argmax(dim=1)
+            preds = spikes.sum(dim=0).argmax(dim=1)
+            # preds = spikes.argmax(dim=1)
             correct += (preds.squeeze() == labels).sum().item()
             total += labels.size(0)
             pbar.set_description(f"Test Batch {i+1}, Accuracy: {correct/total:.4f}, Loss: {sum(test_loss)/len(test_loss):.4f}")
@@ -126,7 +126,7 @@ def test(model, test_dl, device, loss_fn):
     return accuracy, test_loss
 
 def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
-    fade_map = torch.zeros(frames[0].shape[1:3]) # H x W
+    fade_map = torch.zeros(frames[0].shape[1:4]) # H x W
     faded_frames = []
     for f in range(len(frames)):
         faded_frames.append([])
@@ -140,7 +140,7 @@ def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
 
 if __name__ == "__main__":
     # Test event_fade
-    rdm = torch.randn(100, 2, 32, 32)
+    rdm = torch.randn(100, 1, 32, 32)
     rdm[rdm < 0] = 0
     faded = add_event_fade([rdm], decay=0.9)
     print(rdm.shape)

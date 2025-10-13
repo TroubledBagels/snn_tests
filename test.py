@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import tonic
 from torch.utils.data import DataLoader
-from models.SimpleConvNoRes import SimpleConvModel
+from models.SimpleConv import SimpleConvModel
 import tqdm
 import utils.general as g
 import torch.nn as nn
@@ -34,6 +34,7 @@ def collate_fn(batch, train=True):
     for event in events:
         frame = torch.from_numpy(transform(event)).float()
         frame_combined = frame[:, 0, :, :] - frame[:, 1, :, :]
+        frame_combined = frame_combined.unsqueeze(1)
         #T, H, W = frame_combined.shape
         #frame_combined = frame_combined.view(T, 1, H, W)
         frames.append(frame_combined)
@@ -43,12 +44,13 @@ def collate_fn(batch, train=True):
 
     frames = torch.stack(frames)
 
+
     labels = torch.tensor(labels)
     return frames, labels
 
 if __name__ == "__main__":
-    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = "cuda:0"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = "cuda:0"
     print(f"Using device: {device}")
 
     bottom_label = 0
@@ -72,15 +74,9 @@ if __name__ == "__main__":
     print(f"Total Nonzero Entries: {(sample != 0).sum()}")
     print(f"Number of new entries after fade (ish): {(sample != 0).sum() - (sample == 1).sum() - (sample == -1).sum()}")
 
-    #model = SimpleConvModel(num_classes=top_label-bottom_label)
-    model = nn.Sequential(
-        nn.Conv2d(200, 16, 3, 1, 1),
-        nn.ReLU(),
-        nn.Flatten(),
-        nn.Linear(64*32*32, 5)
-    )
+    model = SimpleConvModel(in_c=1, out_c=top_label-bottom_label)
     print(model)
-    #loss_fn = snn.functional.ce_count_loss()
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = snn.functional.ce_count_loss()
+    # loss_fn = nn.CrossEntropyLoss()
     model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=20, save_name="20")
     torch.save(model.state_dict(), "model_20.pth")
