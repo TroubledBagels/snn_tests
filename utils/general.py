@@ -44,6 +44,7 @@ def plot_acc(acc_rec, test_acc_rec: list[list], save_name="acc.png"):
 def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e-4, epochs=10, weight_decay=0, save_name=None):
     print("Training model...")
     optimiser = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    print(f"Using optimiser: {optimiser}")
     model.to(device)
     print(f"Model training on {device}...")
     model.train()
