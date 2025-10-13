@@ -9,25 +9,30 @@ class SimpleConvModel(nn.Module):
         self.spike_grad = snn.surrogate.atan()
         self.conv1 = nn.Conv2d(in_c, 16, kernel_size=3, stride=1, padding=1)
         self.lif1 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
+        self.conv2 = nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1)
+        self.lif2 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
         self.flatten = nn.Flatten()
         self.fc1 = nn.Linear(16 * 64 * 64, out_c)
-        self.lif2 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
+        self.lif3 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
 
     def forward(self, x):
         B, T, C, H, W = x.shape
         mem1 = self.lif1.init_leaky()
         mem2 = self.lif2.init_leaky()
+        mem3 = self.lif3.init_leaky()
         spk_rec = []
 
         for t in range(T):
             xt = x[:, t, :, :, :]  # Shape: (B, C, H, W)
             xt = self.conv1(xt)
             xt, mem1 = self.lif1(xt, mem1)
+            xt = self.conv2(xt)
+            xt, mem2 = self.lif2(xt, mem2)
             xt = self.flatten(xt)
             xt = self.fc1(xt)
-            xt, mem2 = self.lif2(xt, mem2)
+            xt, mem3 = self.lif3(xt, mem3)
             # spk_rec.append(xt)
-            spk_rec.append(mem2)
+            spk_rec.append(mem3)
 
         # out = torch.stack(spk_rec)
         out = torch.stack(spk_rec).mean(dim=0)
