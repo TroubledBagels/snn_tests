@@ -64,8 +64,8 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
 
             optimiser.zero_grad()
 
-            spikes, _ = model(inputs)
-            # spikes = model(inputs)
+            # spikes, _ = model(inputs)
+            spikes = model(inputs)
             loss = loss_fn(spikes, labels.long())
             loss_rec.append(loss.item())
 
@@ -112,8 +112,8 @@ def test(model, test_dl, device, loss_fn):
         for i, (inputs, labels) in enumerate(pbar):
             labels = labels.to(device).long()
             inputs = inputs.to(device)
-            spikes, mems = model(inputs)
-            # spikes = model(inputs)
+            # spikes, mems = model(inputs)
+            spikes = model(inputs)
             # one-hot encode labels
             # labels_onehot = torch.zeros(labels.size(0), 2).to(device)
             loss = loss_fn(spikes, labels.long())

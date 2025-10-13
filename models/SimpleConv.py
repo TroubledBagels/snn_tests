@@ -22,10 +22,10 @@ class SimpleConvModel(nn.Module):
         for t in range(T):
             xt = x[:, t, :, :, :]  # Shape: (B, C, H, W)
             xt = self.conv1(xt)
-            xt, mem1 = self.lif1(xt, mem1)
+            # xt, mem1 = self.lif1(xt, mem1)
             xt = self.flatten(xt)
             xt = self.fc1(xt)
-            xt, mem2 = self.lif2(xt, mem2)
+            # xt, mem2 = self.lif2(xt, mem2)
             spk_rec.append(xt)
 
         return torch.stack(spk_rec), (mem1, mem2)
