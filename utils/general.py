@@ -137,13 +137,22 @@ def test(model, test_dl, device, loss_fn):
                 class_fps[j] += ((preds == j) & (labels != j)).sum().item()
                 class_fns[j] += ((preds != j) & (labels == j)).sum().item()
             pbar.set_description(f"Testing Batch {i+1}, Loss: {sum(test_loss)/len(test_loss):.4f}, Testing Acc: {correct/total:.4f}")
+    pbar.close()
     accuracy = correct / total
     # Calculate F1 score for each class
     for j in class_f1.keys():
         precision = class_tps[j] / (class_tps[j] + class_fps[j] + 1e-8)
         recall = class_tps[j] / (class_tps[j] + class_fns[j] + 1e-8)
         class_f1[j] = 2 * (precision * recall) / (precision + recall + 1e-8)
-        print(f"Class {j}: F1 Score: {class_f1[j]:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}")
+    classes_in_order = sorted(class_f1.keys())
+    classes_per_line = 5
+    print("Class-wise F1 Scores:")
+    for i in range(0, len(classes_in_order), classes_per_line):
+        line_classes = classes_in_order[i:i+classes_per_line]
+        line_f1s = [f"{class_f1[c]:.4f}" for c in line_classes]
+        print("Classes:", " ".join(f"{c:>5}" for c in line_classes))
+        print("F1 Scores:", " ".join(f"{f:>5}" for f in line_f1s))
+    print(f"Mean F1 Score: {sum(class_f1.values())/len(class_f1):.4f}")
     return accuracy, test_loss
 
 def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
