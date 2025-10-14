@@ -109,6 +109,8 @@ def test(model, test_dl, device, loss_fn):
     total = 0
     test_loss = []
     class_f1 = {}
+    class_precision = {}
+    class_recall = {}
     class_tps = {}
     class_fps = {}
     class_fns = {}
@@ -143,6 +145,8 @@ def test(model, test_dl, device, loss_fn):
     for j in class_f1.keys():
         precision = class_tps[j] / (class_tps[j] + class_fps[j] + 1e-8)
         recall = class_tps[j] / (class_tps[j] + class_fns[j] + 1e-8)
+        class_precision[j] = precision
+        class_recall[j] = recall
         class_f1[j] = 2 * (precision * recall) / (precision + recall + 1e-8)
     classes_in_order = sorted(class_f1.keys())
     classes_per_line = 5
@@ -152,6 +156,8 @@ def test(model, test_dl, device, loss_fn):
         line_f1s = [f"{class_f1[c]:.4f}" for c in line_classes]
         print("Classes:", " ".join(f"{c:>5}" for c in line_classes))
         print("F1 Scores:", " ".join(f"{f:>5}" for f in line_f1s))
+        print("Precision:", " ".join(f"{class_precision[c]:>5.4f}" for c in line_classes))
+        print("Recall:   ", " ".join(f"{class_recall[c]:>5.4f}" for c in line_classes))
     print(f"Mean F1 Score: {sum(class_f1.values())/len(class_f1):.4f}")
     return accuracy, test_loss
 
