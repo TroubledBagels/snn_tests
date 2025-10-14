@@ -36,11 +36,11 @@ class SimpleConvModel(nn.Module):
             # xt, mem3 = self.lif3(xt, mem3)
             xt = self.fc2(xt)
             xt, mem4 = self.lif4(xt, mem4)
-            spk_rec.append(xt)
-            # spk_rec.append(mem4)
+            # spk_rec.append(xt)
+            spk_rec.append(mem4)
 
-        out = torch.stack(spk_rec)
-        # out = torch.stack(spk_rec).mean(dim=0)
+        # out = torch.stack(spk_rec)
+        out = torch.stack(spk_rec).mean(dim=0)
 
         return out, (mem1, mem2)
 
