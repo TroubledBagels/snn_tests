@@ -122,7 +122,7 @@ def test(model, test_dl, device, loss_fn):
             preds = spikes.argmax(dim=1)
             correct += (preds.squeeze() == labels).sum().item()
             total += labels.size(0)
-            pbar.set_description(f"Test Batch {i+1}, Accuracy: {correct/total:.4f}, Loss: {sum(test_loss)/len(test_loss):.4f}")
+            pbar.set_description(f"Testing Batch {i+1}, Loss: {sum(test_loss)/len(test_loss):.4f},  Accuracy: {correct/total:.4f}")
     accuracy = correct / total
     return accuracy, test_loss
 
