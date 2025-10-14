@@ -108,6 +108,10 @@ def test(model, test_dl, device, loss_fn):
     correct = 0
     total = 0
     test_loss = []
+    class_f1 = {}
+    class_tps = {}
+    class_fps = {}
+    class_fns = {}
 
     with torch.no_grad():
         for i, (inputs, labels) in enumerate(pbar):
@@ -123,8 +127,23 @@ def test(model, test_dl, device, loss_fn):
             preds = spikes.argmax(dim=1)
             correct += (preds.squeeze() == labels).sum().item()
             total += labels.size(0)
+            for j in range(labels.min().item(), labels.max().item()+1):
+                if j not in class_f1:
+                    class_f1[j] = 0
+                    class_tps[j] = 0
+                    class_fps[j] = 0
+                    class_fns[j] = 0
+                class_tps[j] += ((preds == j) & (labels == j)).sum().item()
+                class_fps[j] += ((preds == j) & (labels != j)).sum().item()
+                class_fns[j] += ((preds != j) & (labels == j)).sum().item()
             pbar.set_description(f"Testing Batch {i+1}, Loss: {sum(test_loss)/len(test_loss):.4f}, Testing Acc: {correct/total:.4f}")
     accuracy = correct / total
+    # Calculate F1 score for each class
+    for j in class_f1.keys():
+        precision = class_tps[j] / (class_tps[j] + class_fps[j] + 1e-8)
+        recall = class_tps[j] / (class_tps[j] + class_fns[j] + 1e-8)
+        class_f1[j] = 2 * (precision * recall) / (precision + recall + 1e-8)
+        print(f"Class {j}: F1 Score: {class_f1[j]:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}")
     return accuracy, test_loss
 
 def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
