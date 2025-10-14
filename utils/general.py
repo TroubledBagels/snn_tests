@@ -57,6 +57,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
     for epoch in range(epochs):
         total_loss = 0.0
         total_acc = 0.0
+        print("----------------------------------------------------")
         pbar = tqdm.tqdm(train_dl)
         for i, (inputs, labels) in enumerate(pbar):
             labels = labels.to(device)
