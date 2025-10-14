@@ -12,7 +12,7 @@ class SimpleConvModel(nn.Module):
         self.conv2 = nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1)
         self.lif2 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(16 * 64 * 64, 4096)
+        self.fc1 = nn.Linear(16 * 64 * 64, 256)
         self.dropout1 = nn.Dropout(p=0.2)
         self.lif3 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
         self.fc2 = nn.Linear(4096, 256)
@@ -46,7 +46,7 @@ class SimpleConvModel(nn.Module):
             xt = self.fc3(xt)
             xt, mem5 = self.lif5(xt, mem5)
             # spk_rec.append(xt)
-            spk_rec.append(mem4)
+            spk_rec.append(mem5)
 
         # out = torch.stack(spk_rec)
         out = torch.stack(spk_rec).mean(dim=0)
