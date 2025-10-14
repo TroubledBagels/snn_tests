@@ -149,7 +149,7 @@ def test(model, test_dl, device, loss_fn):
         class_recall[j] = recall
         class_f1[j] = 2 * (precision * recall) / (precision + recall + 1e-8)
     classes_in_order = sorted(class_f1.keys())
-    classes_per_line = 5
+    classes_per_line = 15
     print("Class-wise F1 Scores:")
     for i in range(0, len(classes_in_order), classes_per_line):
         line_classes = classes_in_order[i:i+classes_per_line]

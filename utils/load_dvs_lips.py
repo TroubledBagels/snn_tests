@@ -283,6 +283,19 @@ def get_range(train=True, label_min=0, label_max=50):
             ds_array.append((events, label))
     return ds_array
 
+def get_number(train=True, num_classes=5):
+    ds = get_dataset(train=train)
+    ds_array = []
+    class_interval = 100 // num_classes
+    req_classes = [i for i in range(0, 100, class_interval)]
+    print(f"Getting {req_classes} classes from dataset...")
+    for i in range(len(ds)):
+        events, label = ds[i]
+        if label in req_classes:
+            new_label = req_classes.index(label)
+            ds_array.append((events, new_label))
+    return ds_array
+
 if __name__ == "__main__":
     ds = get_differ(train=True, label1=25, label2=26)
     print(f"Filtered dataset size: {len(ds)}")
