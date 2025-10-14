@@ -20,15 +20,15 @@ def collate_fn(batch, train=True):
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
             tonic.transforms.RandomFlipLR(p=0.5, sensor_size=sensor_size),
             #tonic.transforms.RandomFlipUD(p=0.2, sensor_size=sensor_size),
-            tonic.transforms.UniformNoise(sensor_size=sensor_size, n=5000),
+            tonic.transforms.UniformNoise(sensor_size=sensor_size, n=150),
             tonic.transforms.EventDrop(sensor_size=sensor_size),
             # tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
-            tonic.transforms.ToFrame(n_time_bins=200, sensor_size=sensor_size),
+            tonic.transforms.ToFrame(n_time_bins=30, sensor_size=sensor_size),
         ])
     else:
         transform = tonic.transforms.Compose([
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
-            tonic.transforms.ToFrame(n_time_bins=200, sensor_size=sensor_size)
+            tonic.transforms.ToFrame(n_time_bins=30, sensor_size=sensor_size)
         ])
     frames = []
     for event in events:
@@ -38,7 +38,7 @@ def collate_fn(batch, train=True):
         #T, H, W = frame_combined.shape
         #frame_combined = frame_combined.view(T, 1, H, W)
         frames.append(frame_combined)
-    frames = g.add_event_fade(frames, decay=0.6)
+    # frames = g.add_event_fade(frames, decay=0.6)
 
     # set frame num to max of batch
 
