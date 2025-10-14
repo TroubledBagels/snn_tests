@@ -56,8 +56,8 @@ if __name__ == "__main__":
     bottom_label = 0
     top_label = 5
 
-    train_ds = dvs.get_range(True, bottom_label, top_label)
-    test_ds = dvs.get_range(False, bottom_label, top_label)
+    train_ds = dvs.get_number(True, top_label)
+    test_ds = dvs.get_number(False, top_label)
 
     train_dl = DataLoader(train_ds, batch_size=32, shuffle=True, collate_fn=lambda x: collate_fn(x))
     test_dl = DataLoader(test_ds, batch_size=32, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
