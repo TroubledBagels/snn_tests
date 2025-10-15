@@ -289,6 +289,20 @@ def get_number(train=True, num_classes=5):
     class_interval = 100 // num_classes
     req_classes = [i for i in range(0, 100, class_interval)]
     print(f"Getting {req_classes} classes from dataset...")
+    labels = ['accused', 'action', 'allow', 'allowed', 'america', 'american', 'another', 'around', 'attacks', 'banks',
+              'become', 'being', 'benefit', 'benefits', 'between', 'billion', 'called', 'capital', 'challenge',
+              'change', 'chief', 'couple', 'court', 'death', 'described', 'difference', 'different', 'during',
+              'economic', 'education', 'election', 'england', 'evening', 'everything', 'exactly', 'general', 'germany',
+              'giving', 'ground', 'happen', 'happened', 'having', 'heavy', 'house', 'hundreds', 'immigration', 'judge',
+              'labour', 'leaders', 'legal', 'little', 'london', 'majority', 'meeting', 'military', 'million', 'minutes',
+              'missing', 'needs', 'number', 'numbers', 'paying', 'perhaps', 'point', 'potential', 'press', 'price',
+              'question', 'really', 'right', 'russia', 'russian', 'saying', 'security', 'several', 'should',
+              'significant', 'spend', 'spent', 'started', 'still', 'support', 'syria', 'syrian', 'taken', 'taking',
+              'terms', 'these', 'thing', 'think', 'times', 'tomorrow', 'under', 'warning', 'water', 'welcome', 'words',
+              'worst', 'years', 'young']
+    print(f"These are:")
+    for i in range(len(req_classes)):
+        print(f"- {labels[i]}")
     for i in range(len(ds)):
         events, label = ds[i]
         if label in req_classes:
