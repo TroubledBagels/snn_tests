@@ -57,6 +57,6 @@ if __name__ == "__main__":
     net = TestNet()
 
     grid_img = generate_from_layer(net.conv1)
-    cv2.imwrite("kernel.png", grid_img)
+    cv2.imwrite("../imgs/kernel.png", grid_img)
     cv2.imshow("Kernels", grid_img)
     cv2.waitKey(0)
