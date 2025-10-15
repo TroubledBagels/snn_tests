@@ -302,7 +302,7 @@ def get_number(train=True, num_classes=5):
               'worst', 'years', 'young']
     print(f"These are:")
     for i in range(len(req_classes)):
-        print(f"- {labels[i]}")
+        print(f"- {labels[req_classes[i]]} ({req_classes[i]})")
     for i in range(len(ds)):
         events, label = ds[i]
         if label in req_classes:
