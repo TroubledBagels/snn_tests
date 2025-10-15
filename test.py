@@ -16,7 +16,7 @@ def collate_fn(batch, train=True):
     events, labels = zip(*batch)
     downsample_factor = 1
     sensor_size = (int(128 * downsample_factor), int(128 * downsample_factor), 2)
-    time_bins = 200
+    time_bins = 800
     if train:
         transform = tonic.transforms.Compose([
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
@@ -24,8 +24,8 @@ def collate_fn(batch, train=True):
             #tonic.transforms.RandomFlipUD(p=0.2, sensor_size=sensor_size),
             tonic.transforms.UniformNoise(sensor_size=sensor_size, n=150),
             tonic.transforms.EventDrop(sensor_size=sensor_size),
-            # tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
-            tonic.transforms.ToFrame(n_time_bins=200, sensor_size=sensor_size),
+            tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
+            # tonic.transforms.ToFrame(n_time_bins=time_bins, sensor_size=sensor_size),
         ])
         torch_transforms = transforms.Compose([
             transforms.CenterCrop((96, 96)),
@@ -34,7 +34,8 @@ def collate_fn(batch, train=True):
     else:
         transform = tonic.transforms.Compose([
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
-            tonic.transforms.ToFrame(n_time_bins=200, sensor_size=sensor_size)
+            tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
+            # tonic.transforms.ToFrame(n_time_bins=time_bins, sensor_size=sensor_size)
         ])
         torch_transforms = transforms.Compose([
             transforms.CenterCrop((88, 88))
@@ -48,7 +49,7 @@ def collate_fn(batch, train=True):
         #T, H, W = frame_combined.shape
         #frame_combined = frame_combined.view(T, 1, H, W)
         frames.append(frame_combined)
-    frames = g.add_event_fade(frames, decay=0.6)
+    frames = g.add_event_fade(frames, decay=0.9)
 
     # set frame num to max of batch
 
@@ -69,8 +70,8 @@ if __name__ == "__main__":
     train_ds = dvs.get_number(True, top_label)
     test_ds = dvs.get_number(False, top_label)
 
-    train_dl = DataLoader(train_ds, batch_size=32, shuffle=True, collate_fn=lambda x: collate_fn(x))
-    test_dl = DataLoader(test_ds, batch_size=32, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
+    train_dl = DataLoader(train_ds, batch_size=1, shuffle=True, collate_fn=lambda x: collate_fn(x))
+    test_dl = DataLoader(test_ds, batch_size=1, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
 
     sample, label = next(iter(train_dl))
     print(f"Sample shape: {sample.shape}")
