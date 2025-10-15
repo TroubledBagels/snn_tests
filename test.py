@@ -48,7 +48,7 @@ def collate_fn(batch, train=True):
         #T, H, W = frame_combined.shape
         #frame_combined = frame_combined.view(T, 1, H, W)
         frames.append(frame_combined)
-    # frames = g.add_event_fade(frames, decay=0.6)
+    frames = g.add_event_fade(frames, decay=0.6)
 
     # set frame num to max of batch
 
