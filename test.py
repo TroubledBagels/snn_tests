@@ -16,6 +16,7 @@ def collate_fn(batch, train=True):
     events, labels = zip(*batch)
     downsample_factor = 1
     sensor_size = (int(128 * downsample_factor), int(128 * downsample_factor), 2)
+    time_bins = 200
     if train:
         transform = tonic.transforms.Compose([
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
@@ -24,7 +25,7 @@ def collate_fn(batch, train=True):
             tonic.transforms.UniformNoise(sensor_size=sensor_size, n=150),
             tonic.transforms.EventDrop(sensor_size=sensor_size),
             # tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
-            tonic.transforms.ToFrame(n_time_bins=30, sensor_size=sensor_size),
+            tonic.transforms.ToFrame(n_time_bins=200, sensor_size=sensor_size),
         ])
         torch_transforms = transforms.Compose([
             transforms.CenterCrop((96, 96)),
@@ -33,7 +34,7 @@ def collate_fn(batch, train=True):
     else:
         transform = tonic.transforms.Compose([
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
-            tonic.transforms.ToFrame(n_time_bins=30, sensor_size=sensor_size)
+            tonic.transforms.ToFrame(n_time_bins=200, sensor_size=sensor_size)
         ])
         torch_transforms = transforms.Compose([
             transforms.CenterCrop((88, 88))
