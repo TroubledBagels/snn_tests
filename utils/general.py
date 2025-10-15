@@ -63,6 +63,7 @@ def plot_f1(f1_rec: list[list], save_name="f1.png"):
 def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e-4, epochs=10, weight_decay=0, save_name=None):
     print("Training model...")
     optimiser = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimiser)
     print(f"Using optimiser: {optimiser}")
     model.to(device)
     print(f"Model training on {device}...")
@@ -110,6 +111,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         test_acc_rec.append(test_acc)
         test_loss_rec.append(np.mean(test_loss))
         test_f1_rec.append(test_f1)
+        lr_scheduler.step(np.mean(test_loss))
     print("Training complete.")
     
     if save_name is None:
