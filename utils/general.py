@@ -50,8 +50,8 @@ def plot_f1(f1_rec: list[list], save_name="f1.png"):
     # Scatter plot with different colour per class
     for c in range(num_classes):
         class_f1 = [f1_rec[e][c] for e in range(num_epochs)]
-        plt.scatter([i for i in range(num_epochs)], class_f1, marker='x', s=10, label=f'Class {c}', color=colours[c % len(colours)])
-        plt.plot(np.convolve(class_f1, np.ones(5)/5, mode='valid'), label=f'Class {c} (smoothed)')
+        plt.scatter([i for i in range(num_epochs)], class_f1, marker='x', s=5, label=f'Class {c}', color=colours[c % len(colours)])
+        plt.plot(np.convolve(class_f1, np.ones(5)/5, mode='valid'), label=f'Class {c} (smoothed)', color=colours[c % len(colours)])
     plt.xlabel("Epoch")
     plt.ylabel("F1 Score")
     plt.ylim(0, 1)
