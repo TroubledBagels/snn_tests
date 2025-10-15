@@ -41,6 +41,7 @@ def collate_fn(batch, train=True):
     frames = []
     for event in events:
         frame = torch.from_numpy(transform(event)).float()
+        frame = torch_transforms(frame)
         frame_combined = frame[:, 0, :, :] - frame[:, 1, :, :]
         frame_combined = frame_combined.unsqueeze(1)
         #T, H, W = frame_combined.shape
