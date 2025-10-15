@@ -64,7 +64,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     bottom_label = 0
-    top_label = 5
+    top_label = 10
 
     train_ds = dvs.get_number(True, top_label)
     test_ds = dvs.get_number(False, top_label)
