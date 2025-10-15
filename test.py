@@ -24,8 +24,8 @@ def collate_fn(batch, train=True):
             #tonic.transforms.RandomFlipUD(p=0.2, sensor_size=sensor_size),
             tonic.transforms.UniformNoise(sensor_size=sensor_size, n=150),
             tonic.transforms.EventDrop(sensor_size=sensor_size),
-            tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
-            # tonic.transforms.ToFrame(n_time_bins=time_bins, sensor_size=sensor_size),
+            # tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
+            tonic.transforms.ToFrame(n_time_bins=time_bins, sensor_size=sensor_size),
         ])
         torch_transforms = transforms.Compose([
             transforms.CenterCrop((96, 96)),
@@ -34,8 +34,8 @@ def collate_fn(batch, train=True):
     else:
         transform = tonic.transforms.Compose([
             tonic.transforms.Downsample(spatial_factor=downsample_factor),
-            tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
-            # tonic.transforms.ToFrame(n_time_bins=time_bins, sensor_size=sensor_size)
+            # tonic.transforms.ToFrame(time_window=1000, sensor_size=sensor_size),
+            tonic.transforms.ToFrame(n_time_bins=time_bins, sensor_size=sensor_size)
         ])
         torch_transforms = transforms.Compose([
             transforms.CenterCrop((88, 88))
@@ -65,13 +65,15 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     bottom_label = 0
-    top_label = 10
+    top_label = 20
 
     train_ds = dvs.get_number(True, top_label)
     test_ds = dvs.get_number(False, top_label)
 
-    train_dl = DataLoader(train_ds, batch_size=1, shuffle=True, collate_fn=lambda x: collate_fn(x))
-    test_dl = DataLoader(test_ds, batch_size=1, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
+    bs = 32
+
+    train_dl = DataLoader(train_ds, batch_size=bs, shuffle=True, collate_fn=lambda x: collate_fn(x))
+    test_dl = DataLoader(test_ds, batch_size=bs, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
 
     sample, label = next(iter(train_dl))
     print(f"Sample shape: {sample.shape}")
