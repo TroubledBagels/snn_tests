@@ -109,7 +109,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         test_acc, test_loss, test_f1 = test(model, test_dl, device, loss_fn)
         test_acc_rec.append(test_acc)
         test_loss_rec.append(np.mean(test_loss))
-        test_f1_rec.append(np.mean(test_f1))
+        test_f1_rec.append(test_f1)
     print("Training complete.")
     
     if save_name is None:
