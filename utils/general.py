@@ -41,6 +41,25 @@ def plot_acc(acc_rec, test_acc_rec: list[list], save_name="acc.png"):
     plt.show()
     plt.savefig(save_name)
 
+def plot_f1(f1_rec: list[list], save_name="f1.png"):
+    # List of type epochs x classes
+    plt.figure(figsize=(8, 8))
+    num_epochs = len(f1_rec)
+    num_classes = len(f1_rec[0]) if num_epochs > 0 else 0
+    colours = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+    # Scatter plot with different colour per class
+    for c in range(num_classes):
+        class_f1 = [f1_rec[e][c] for e in range(num_epochs)]
+        plt.scatter([i for i in range(num_epochs)], class_f1, marker='x', s=10, label=f'Class {c}', color=colours[c % len(colours)])
+        plt.plot(np.convolve(class_f1, np.ones(5)/5, mode='valid'), label=f'Class {c} (smoothed)')
+    plt.xlabel("Epoch")
+    plt.ylabel("F1 Score")
+    plt.ylim(0, 1)
+    plt.title("Class-wise F1 Score Over Epochs")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.show()
+    plt.savefig(save_name, bbox_inches='tight')
+
 def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e-4, epochs=10, weight_decay=0, save_name=None):
     print("Training model...")
     optimiser = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -53,6 +72,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
     test_loss_rec = []
     acc_rec = []
     test_acc_rec = []
+    test_f1_rec = []
 
     for epoch in range(epochs):
         total_loss = 0.0
@@ -86,17 +106,20 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
 
             pbar.set_description(f"Epoch {epoch + 1}, Batch {i + 1}, Loss: {avg_loss:.4f}, Train Acc: {avg_acc:.4f}")
         pbar.close()
-        test_acc, test_loss = test(model, test_dl, device, loss_fn)
+        test_acc, test_loss, test_f1 = test(model, test_dl, device, loss_fn)
         test_acc_rec.append(test_acc)
         test_loss_rec.append(np.mean(test_loss))
+        test_f1_rec.append(np.mean(test_f1))
     print("Training complete.")
     
     if save_name is None:
         plot_loss(loss_rec, test_loss_rec)
         plot_acc(acc_rec, test_acc_rec)
+        plot_f1(test_f1_rec)
     else:
         plot_loss(loss_rec, test_loss_rec, save_name=save_name+"_loss.png")
         plot_acc(acc_rec, test_acc_rec, save_name=save_name+"_acc.png")
+        plot_f1(test_f1_rec, save_name=save_name+"_f1.png")
 
     return model
 
@@ -159,7 +182,8 @@ def test(model, test_dl, device, loss_fn):
         print("Precision:", " ".join(f"{class_precision[c]:>5.4f}" for c in line_classes))
         print("Recall:   ", " ".join(f"{class_recall[c]:>5.4f}" for c in line_classes))
     print(f"Mean F1 Score: {sum(class_f1.values())/len(class_f1):.4f}")
-    return accuracy, test_loss
+    class_f1_scores = [class_f1[c] for c in sorted(class_f1.keys())]
+    return accuracy, test_loss, class_f1_scores
 
 def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
     fade_map = torch.zeros(frames[0].shape[1:4]) # H x W
