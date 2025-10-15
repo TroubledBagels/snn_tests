@@ -177,7 +177,7 @@ def test(model, test_dl, device, loss_fn):
     for i in range(0, len(classes_in_order), classes_per_line):
         line_classes = classes_in_order[i:i+classes_per_line]
         line_f1s = [f"{class_f1[c]:.4f}" for c in line_classes]
-        print("Classes:", " ".join(f"{c:>5}" for c in line_classes))
+        print("Classes:", " ".join(f"{c:>6}" for c in line_classes))
         print("F1 Scores:", " ".join(f"{f:>5}" for f in line_f1s))
         print("Precision:", " ".join(f"{class_precision[c]:>5.4f}" for c in line_classes))
         print("Recall:   ", " ".join(f"{class_recall[c]:>5.4f}" for c in line_classes))
