@@ -65,7 +65,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     bottom_label = 0
-    top_label = 100
+    top_label = 20
 
     train_ds = dvs.get_number(True, top_label)
     test_ds = dvs.get_number(False, top_label)
@@ -93,5 +93,5 @@ if __name__ == "__main__":
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     print(f"Using loss function: {loss_fn}")
 
-    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=24, save_name="20", weight_decay=1e-5)
+    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=120, save_name="20", weight_decay=1e-5)
     torch.save(model.state_dict(), "model_20.pth")
