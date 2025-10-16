@@ -310,6 +310,146 @@ def get_number(train=True, num_classes=5):
             ds_array.append((events, new_label))
     return ds_array
 
+def load_combined_ambiguous(train = True):
+    ds = get_dataset(train=train)
+    ds_array = []
+    labels = ['accused', 'action', 'allow', 'allowed', 'america', 'american', 'another', 'around', 'attacks', 'banks',
+              'become', 'being', 'benefit', 'benefits', 'between', 'billion', 'called', 'capital', 'challenge',
+              'change', 'chief', 'couple', 'court', 'death', 'described', 'difference', 'different', 'during',
+              'economic', 'education', 'election', 'england', 'evening', 'everything', 'exactly', 'general', 'germany',
+              'giving', 'ground', 'happen', 'happened', 'having', 'heavy', 'house', 'hundreds', 'immigration', 'judge',
+              'labour', 'leaders', 'legal', 'little', 'london', 'majority', 'meeting', 'military', 'million', 'minutes',
+              'missing', 'needs', 'number', 'numbers', 'paying', 'perhaps', 'point', 'potential', 'press', 'price',
+              'question', 'really', 'right', 'russia', 'russian', 'saying', 'security', 'several', 'should',
+              'significant', 'spend', 'spent', 'started', 'still', 'support', 'syria', 'syrian', 'taken', 'taking',
+              'terms', 'these', 'thing', 'think', 'times', 'tomorrow', 'under', 'warning', 'water', 'welcome', 'words',
+              'worst', 'years', 'young']
+    ambigious_labels = ['action', 'allow', 'allowed', 'america', 'american', 'around', 'being', 'benefit', 'benefits',
+                        'billion', 'called', 'challenge', 'change', 'court', 'difference', 'different', 'election',
+                        'evening', 'giving', 'ground', 'happen', 'happened', 'having', 'heavy', 'legal', 'little',
+                        'meeting', 'million', 'missing', 'needs', 'number', 'numbers', 'paying', 'press', 'price',
+                        'russia', 'russian', 'spend', 'spent', 'syria', 'syrian', 'taken', 'taking', 'terms', 'these',
+                        'thing', 'think', 'times', 'words', 'worst']
+    word_pairs = {
+        "action": "election", "election": "action",
+        "allow": "allowed", "allowed": "allow",
+        "america": "american", "american": "america",
+        "around": "ground", "ground": "around",
+        "being": "paying", "paying": "being",
+        "benefit": "benefits", "benefits": "benefit",
+        "billion": "million", "million": "billion",
+        "called": "court", "court": "called",
+        "challenge": "change", "change": "challenge",
+        "difference": "different", "different": "difference",
+        "evening": "giving", "giving": "evening",
+        "happen": "happened", "happened": "happen",
+        "having": "heavy", "heavy": "having",
+        "legal": "little", "little": "legal",
+        "meeting": "missing", "missing": "meeting",
+        "number": "numbers", "numbers": "number",
+        "press": "price", "price": "press",
+        "russia": "russian", "russian": "russia",
+        "spend": "spent", "spent": "spend",
+        "syria": "syrian", "syrian": "syria",
+        "taken": "taking", "taking": "taken",
+        "terms": "times", "times": "terms",
+        "thing": "think", "think": "thing",
+        "words": "worst", "worst": "words",
+        "these": "needs", "needs": "these"
+    }
+
+    new_labels = {
+        'accused': 0,
+        'action': 1,
+        'allow': 2,
+        'america': 3,
+        'another': 4,
+        'around': 5,
+        'attacks': 6,
+        'banks': 7,
+        'become': 8,
+        'being': 9,
+        'benefit': 10,
+        'between': 11,
+        'billion': 12,
+        'called': 13,
+        'capital': 14,
+        'challenge': 15,
+        'chief': 16,
+        'couple': 17,
+        'death': 18,
+        'described': 19,
+        'difference': 20,
+        'during': 21,
+        'economic': 22,
+        'education': 23,
+        'england': 24,
+        'evening': 26,
+        'everything': 27,
+        'exactly': 28,
+        'general': 29,
+        'germany': 30,
+        'happen': 31,
+        'having': 32,
+        'house': 33,
+        'hundreds': 34,
+        'immigration': 35,
+        'judge': 36,
+        'labour': 37,
+        'leaders': 38,
+        'legal': 39,
+        'london': 40,
+        'majority': 41,
+        'meeting': 42,
+        'military': 43,
+        'minutes': 44,
+        'needs': 45,
+        'number': 46,
+        'perhaps': 47,
+        'point': 48,
+        'potential': 49,
+        'press': 50,
+        'question': 51,
+        'really': 52,
+        'right': 53,
+        'russia': 54,
+        'saying': 55,
+        'security': 56,
+        'several': 57,
+        'should': 58,
+        'significant': 59,
+        'spend': 60,
+        'started': 61,
+        'still': 62,
+        'support': 63,
+        'syria': 64,
+        'taken': 65,
+        'terms': 66,
+        'thing': 67,
+        'tomorrow': 68,
+        'under': 69,
+        'warning': 70,
+        'water': 71,
+        'welcome': 72,
+        'words': 73,
+        'years': 74,
+        'young': 75
+    }
+
+    for i in range(len(ds)):
+        events, label = ds[i]
+        label_word = labels[label]
+        if label_word in ambigious_labels:
+            pair_word = word_pairs[label_word]
+            if pair_word < label_word:
+                pair_label = new_labels[pair_word]
+                ds_array.append((events, pair_label))  # Label word is second in pair -> class of earliest label in alphabet
+            else:
+                ds_array.append((events, label))  # Label word is first in pair -> class of itself
+        else:
+            ds_array.append((events, label))
+    return ds_array
+
 if __name__ == "__main__":
     ds = get_differ(train=True, label1=25, label2=26)
     print(f"Filtered dataset size: {len(ds)}")

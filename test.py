@@ -12,6 +12,9 @@ import utils.general as g
 import torch.nn as nn
 import torchvision.transforms as transforms
 
+from utils.load_dvs_lips import load_combined_ambiguous
+
+
 def collate_fn(batch, train=True):
     events, labels = zip(*batch)
     downsample_factor = 1
@@ -67,8 +70,8 @@ if __name__ == "__main__":
     bottom_label = 0
     top_label = 100
 
-    train_ds = dvs.get_number(True, top_label)
-    test_ds = dvs.get_number(False, top_label)
+    train_ds = dvs.load_combined_ambiguous(train=True)
+    test_ds = dvs.load_combined_ambiguous(train=False)
 
     bs = 32
 
