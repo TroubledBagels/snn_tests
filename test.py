@@ -68,7 +68,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     bottom_label = 0
-    top_label = 100
+    top_label = 75
 
     train_ds = dvs.load_combined_ambiguous(train=True)
     test_ds = dvs.load_combined_ambiguous(train=False)
