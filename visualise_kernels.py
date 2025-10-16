@@ -6,8 +6,8 @@ import numpy as np
 import cv2
 
 if __name__ == "__main__":
-    model_name = "model_20.pth"
-    net = SimpleConvModel(1, 5)
+    model_name = "100_model.pth"
+    net = SimpleConvModel(1, 100)
     net.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')))
 
     img_1 = vk.generate_from_layer(net.conv1)
