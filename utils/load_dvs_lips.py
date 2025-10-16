@@ -311,6 +311,8 @@ def get_number(train=True, num_classes=5):
     return ds_array
 
 def load_combined_ambiguous(train = True):
+    training = "training" if train else "testing"
+    print(f"Combining ambiguous classes in DVS LIPS dataset for {training}...")
     ds = get_dataset(train=train)
     ds_array = []
     labels = ['accused', 'action', 'allow', 'allowed', 'america', 'american', 'another', 'around', 'attacks', 'banks',
@@ -384,56 +386,56 @@ def load_combined_ambiguous(train = True):
         'economic': 22,
         'education': 23,
         'england': 24,
-        'evening': 26,
-        'everything': 27,
-        'exactly': 28,
-        'general': 29,
-        'germany': 30,
-        'happen': 31,
-        'having': 32,
-        'house': 33,
-        'hundreds': 34,
-        'immigration': 35,
-        'judge': 36,
-        'labour': 37,
-        'leaders': 38,
-        'legal': 39,
-        'london': 40,
-        'majority': 41,
-        'meeting': 42,
-        'military': 43,
-        'minutes': 44,
-        'needs': 45,
-        'number': 46,
-        'perhaps': 47,
-        'point': 48,
-        'potential': 49,
-        'press': 50,
-        'question': 51,
-        'really': 52,
-        'right': 53,
-        'russia': 54,
-        'saying': 55,
-        'security': 56,
-        'several': 57,
-        'should': 58,
-        'significant': 59,
-        'spend': 60,
-        'started': 61,
-        'still': 62,
-        'support': 63,
-        'syria': 64,
-        'taken': 65,
-        'terms': 66,
-        'thing': 67,
-        'tomorrow': 68,
-        'under': 69,
-        'warning': 70,
-        'water': 71,
-        'welcome': 72,
-        'words': 73,
-        'years': 74,
-        'young': 75
+        'evening': 25,
+        'everything': 26,
+        'exactly': 27,
+        'general': 28,
+        'germany': 29,
+        'happen': 30,
+        'having': 31,
+        'house': 32,
+        'hundreds': 33,
+        'immigration': 34,
+        'judge': 35,
+        'labour': 36,
+        'leaders': 37,
+        'legal': 38,
+        'london': 39,
+        'majority': 40,
+        'meeting': 41,
+        'military': 42,
+        'minutes': 43,
+        'needs': 44,
+        'number': 45,
+        'perhaps': 46,
+        'point': 47,
+        'potential': 48,
+        'press': 49,
+        'question': 50,
+        'really': 51,
+        'right': 52,
+        'russia': 53,
+        'saying': 54,
+        'security': 55,
+        'several': 56,
+        'should': 57,
+        'significant': 58,
+        'spend': 59,
+        'started': 60,
+        'still': 61,
+        'support': 62,
+        'syria': 63,
+        'taken': 64,
+        'terms': 65,
+        'thing': 66,
+        'tomorrow': 67,
+        'under': 68,
+        'warning': 69,
+        'water': 70,
+        'welcome': 71,
+        'words': 72,
+        'years': 73,
+        'young': 74
     }
 
     for i in range(len(ds)):
@@ -445,9 +447,9 @@ def load_combined_ambiguous(train = True):
                 pair_label = new_labels[pair_word]
                 ds_array.append((events, pair_label))  # Label word is second in pair -> class of earliest label in alphabet
             else:
-                ds_array.append((events, label))  # Label word is first in pair -> class of itself
+                ds_array.append((events, new_labels[label_word]))  # Label word is first in pair -> class of itself
         else:
-            ds_array.append((events, label))
+            ds_array.append((events, new_labels[label_word]))
     return ds_array
 
 if __name__ == "__main__":

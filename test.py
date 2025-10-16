@@ -71,6 +71,9 @@ if __name__ == "__main__":
     top_label = 75
 
     train_ds = dvs.load_combined_ambiguous(train=True)
+    # Print the highest and lowest labels in the training set
+    labels = [label for _, label in train_ds]
+    print(f"Training set labels: min {min(labels)}, max {max(labels)}")
     test_ds = dvs.load_combined_ambiguous(train=False)
 
     bs = 32
