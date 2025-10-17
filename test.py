@@ -12,6 +12,8 @@ import utils.general as g
 import torch.nn as nn
 import torchvision.transforms as transforms
 
+import matplotlib.pyplot as plt
+
 from utils.load_dvs_lips import load_combined_ambiguous
 
 
@@ -62,6 +64,19 @@ def collate_fn(batch, train=True):
     labels = torch.tensor(labels)
     return frames, labels
 
+def density_box_plot(ds):
+    num_events = []
+    for i in range(len(ds)):
+        events, _ = ds[i]
+        num_events.append(len(events) / (128 * 128 * 2 * 800))
+        if i % 500 == 0:
+            print(f"Processed {i}/{len(ds)} samples for density plot.")
+
+    plt.boxplot(num_events, vert=False)
+    plt.title("Event Count Distribution")
+    plt.xlabel("Density")
+    plt.show()
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = "cuda:0"
@@ -71,6 +86,7 @@ if __name__ == "__main__":
     top_label = 75
 
     train_ds = dvs.load_combined_ambiguous(train=True)
+    density_box_plot(train_ds)
     # Print the highest and lowest labels in the training set
     labels = [label for _, label in train_ds]
     print(f"Training set labels: min {min(labels)}, max {max(labels)}")
@@ -80,6 +96,11 @@ if __name__ == "__main__":
 
     train_dl = DataLoader(train_ds, batch_size=bs, shuffle=True, collate_fn=lambda x: collate_fn(x))
     test_dl = DataLoader(test_ds, batch_size=bs, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
+
+    fake_ds = []
+    for i, (events, label) in enumerate(train_dl):
+        fake_ds.append((events, label))
+    density_box_plot(fake_ds)
 
     sample, label = next(iter(train_dl))
     print(f"Sample shape: {sample.shape}")
@@ -99,5 +120,5 @@ if __name__ == "__main__":
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     print(f"Using loss function: {loss_fn}")
 
-    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=24, save_name="20", weight_decay=1e-4)
+    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=125, save_name="20", weight_decay=1e-4)
     torch.save(model.state_dict(), "model_20.pth")
