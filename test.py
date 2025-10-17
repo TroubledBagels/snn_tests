@@ -120,5 +120,5 @@ if __name__ == "__main__":
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     print(f"Using loss function: {loss_fn}")
 
-    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=125, save_name="20", weight_decay=1e-4)
+    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=125, save_name="binned", weight_decay=1e-4)
     torch.save(model.state_dict(), "model_binned.pth")
