@@ -97,11 +97,6 @@ if __name__ == "__main__":
     train_dl = DataLoader(train_ds, batch_size=bs, shuffle=True, collate_fn=lambda x: collate_fn(x))
     test_dl = DataLoader(test_ds, batch_size=bs, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
 
-    fake_ds = []
-    for i, (events, label) in enumerate(train_dl):
-        fake_ds.append((events, label))
-    density_box_plot(fake_ds)
-
     sample, label = next(iter(train_dl))
     print(f"Sample shape: {sample.shape}")
     print(f"Sample min: {sample.min()}, max: {sample.max()}")
