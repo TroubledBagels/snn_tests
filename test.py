@@ -115,12 +115,12 @@ if __name__ == "__main__":
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     print(f"Using loss function: {loss_fn}")
 
-    # model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=6, save_name="actually_windowed", weight_decay=1e-4)
+    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=50, save_name="w50", weight_decay=1e-4)
 
-    acc_hist = []
-    for i in range(5):
-        acc_hist.append(g.test(model, test_dl, device=device, loss_fn=loss_fn)[0])
+    # acc_hist = []
+    # for i in range(5):
+    #     acc_hist.append(g.test(model, test_dl, device=device, loss_fn=loss_fn)[0])
 
-    g.plot_acc([0.1, 0.2, 0.3, 0.4, 0.5], acc_hist)
+    # g.plot_acc([0.1, 0.2, 0.3, 0.4, 0.5], acc_hist)
 
     torch.save(model.state_dict(), "actually_windowed.pth")
