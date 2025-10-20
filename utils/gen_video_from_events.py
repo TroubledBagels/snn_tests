@@ -7,9 +7,23 @@ import cv2
 def gen_video_from_events(events, output_path, frame_size=tonic.datasets.DVSLip.sensor_size[:2], target_time=1.0, fade_time=0.2, fps=60):
     # Create from events in form of (x, y, p, t)
     # Get max timestamp
+    labels = ['accused', 'action', 'allow', 'allowed', 'america', 'american', 'another', 'around', 'attacks', 'banks',
+              'become', 'being', 'benefit', 'benefits', 'between', 'billion', 'called', 'capital', 'challenge',
+              'change', 'chief', 'couple', 'court', 'death', 'described', 'difference', 'different', 'during',
+              'economic', 'education', 'election', 'england', 'evening', 'everything', 'exactly', 'general', 'germany',
+              'giving', 'ground', 'happen', 'happened', 'having', 'heavy', 'house', 'hundreds', 'immigration', 'judge',
+              'labour', 'leaders', 'legal', 'little', 'london', 'majority', 'meeting', 'military', 'million', 'minutes',
+              'missing', 'needs', 'number', 'numbers', 'paying', 'perhaps', 'point', 'potential', 'press', 'price',
+              'question', 'really', 'right', 'russia', 'russian', 'saying', 'security', 'several', 'should',
+              'significant', 'spend', 'spent', 'started', 'still', 'support', 'syria', 'syrian', 'taken', 'taking',
+              'terms', 'these', 'thing', 'think', 'times', 'tomorrow', 'under', 'warning', 'water', 'welcome', 'words',
+              'worst', 'years', 'young']
+    print(f"Label: {events[1]} -> {labels[events[1]]}")
     events = events[0]
     print(f"First event: {events[0]}")
     max_time = events[-1][3]
+    print(f"Original max time: {max_time}")
+    target_time = (max_time // 100000 + 1) / 10.0
     new_representation = []
     for event in events:
         temp = float(event[3]) / float(max_time) * float(target_time)
@@ -101,8 +115,11 @@ def play_in_window(video_path, scale=2.0):
         cap.release()
 
 if __name__ == "__main__":
-    ds = dvs.get_dataset(train=True)
+    ds = sorted(dvs.get_dataset(train=True), key=lambda x: x[1])
     # get random sample
-    sample = ds[np.random.randint(len(ds))]
+    for i in range(len(ds)):
+        if ds[i][1] == 87:
+            sample = ds[i+31]
+            break
     gen_video_from_events(sample, "test_vid.mp4", target_time=2.0, fps=60, fade_time=0.2)
     play_in_window("test_vid.mp4", scale=4.0)

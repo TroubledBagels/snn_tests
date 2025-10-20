@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import torch
 import torch.nn as nn
 import tqdm
@@ -29,12 +30,22 @@ def plot_loss(loss_rec, test_loss_rec: list[list], save_name="loss.png"):
 
 def plot_acc(acc_rec, test_acc_rec: list[list], save_name="acc.png"):
     plt.figure(figsize=(8,8))
+    # test_acc_rec is a list of [top1, top3, top5, top10]
+    top1_acc = [acc[0] for acc in test_acc_rec]
+    top3_acc = [acc[1] for acc in test_acc_rec]
+    top5_acc = [acc[2] for acc in test_acc_rec]
+    top10_acc = [acc[3] for acc in test_acc_rec]
+    test_acc_rec = top1_acc
     plt.scatter([i for i in range(len(acc_rec))], acc_rec, marker='x', s=1, color='c', label='Train Acc')
     plt.plot(np.convolve(acc_rec, np.ones(100)/100, mode='valid'), color='blue', label='Train Acc (smoothed)')
     plt.scatter([(i+1)*len(acc_rec)//len(test_acc_rec) for i in range(len(test_acc_rec))], [test_acc_rec[i] for i in range(len(test_acc_rec))], color='orange', label='Test Acc')
     points = [(i+1)*len(acc_rec)//len(test_acc_rec) for i in range(len(test_acc_rec))]
     a, b, c = np.polyfit(points, test_acc_rec, 2)
     plt.plot(points, [a*(x**2) + b*x + c for x in points], color='red', label='Test Acc (trend)')
+    plt.scatter(points, [top3_acc[i] for i in range(len(top3_acc))], color='lime', marker='o', label='Test Top-3 Acc')
+    a, b, c = np.polyfit(points, top3_acc, 2)
+    plt.plot(points, [a*(x**2) + b*x + c for x in points], color='green', label='Test Top-3 Acc (trend)')
+    plt.scatter(points, [top5_acc[i] for i in range(len(top5_acc))], color='blueviolet', marker='o', label='Test Top-5 Acc')
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
     plt.title("Accuracy Over Epochs")
@@ -131,6 +142,9 @@ def test(model, test_dl, device, loss_fn):
 
     pbar = tqdm.tqdm(test_dl)
     correct = 0
+    top3_correct = 0
+    top5_correct = 0
+    top10_correct = 0
     total = 0
     test_loss = []
     class_f1 = {}
@@ -154,6 +168,16 @@ def test(model, test_dl, device, loss_fn):
             preds = spikes.argmax(dim=1)
             correct += (preds.squeeze() == labels).sum().item()
             total += labels.size(0)
+            top3 = spikes.topk(3, dim=1).indices
+            top5 = spikes.topk(5, dim=1).indices
+            top10 = spikes.topk(10, dim=1).indices
+            for j in range(labels.size(0)):
+                if labels[j] in top10[j]:
+                    top10_correct += 1
+                if labels[j] in top5[j]:
+                    top5_correct += 1
+                if labels[j] in top3[j]:
+                    top3_correct += 1
             for j in range(labels.min().item(), labels.max().item()+1):
                 if j not in class_f1:
                     class_f1[j] = 0
@@ -165,7 +189,8 @@ def test(model, test_dl, device, loss_fn):
                 class_fns[j] += ((preds != j) & (labels == j)).sum().item()
             pbar.set_description(f"Testing Batch {i+1}, Loss: {sum(test_loss)/len(test_loss):.4f}, Testing Acc: {correct/total:.4f}")
     pbar.close()
-    accuracy = correct / total
+    accuracy = np.array([correct, top3_correct, top5_correct, top10_correct])
+    accuracy = accuracy / total
     # Calculate F1 score for each class
     for j in class_f1.keys():
         precision = class_tps[j] / (class_tps[j] + class_fps[j] + 1e-8)
