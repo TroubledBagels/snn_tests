@@ -41,11 +41,16 @@ def plot_acc(acc_rec, test_acc_rec: list[list], save_name="acc.png"):
     plt.scatter([(i+1)*len(acc_rec)//len(test_acc_rec) for i in range(len(test_acc_rec))], [test_acc_rec[i] for i in range(len(test_acc_rec))], color='orange', label='Test Acc')
     points = [(i+1)*len(acc_rec)//len(test_acc_rec) for i in range(len(test_acc_rec))]
     a, b, c = np.polyfit(points, test_acc_rec, 2)
-    plt.plot(points, [a*(x**2) + b*x + c for x in points], color='red', label='Test Acc (trend)')
-    plt.scatter(points, [top3_acc[i] for i in range(len(top3_acc))], color='lime', marker='o', label='Test Top-3 Acc')
+    plt.plot(points, [a*(x**2) + b*x + c for x in points], color='darkorange', label='Test Acc (trend)')
+    plt.scatter(points, [top3_acc[i] for i in range(len(top3_acc))], color='lime', marker='x', label='Test Top-3 Acc', s=3)
     a, b, c = np.polyfit(points, top3_acc, 2)
     plt.plot(points, [a*(x**2) + b*x + c for x in points], color='green', label='Test Top-3 Acc (trend)')
-    plt.scatter(points, [top5_acc[i] for i in range(len(top5_acc))], color='blueviolet', marker='o', label='Test Top-5 Acc')
+    plt.scatter(points, [top5_acc[i] for i in range(len(top5_acc))], color='blueviolet', marker='x', label='Test Top-5 Acc', s=3)
+    a, b, c = np.polyfit(points, top5_acc, 2)
+    plt.plot(points, [a*(x**2) + b*x + c for x in points], color='purple', label='Test Top-5 Acc (trend)')
+    plt.scatter(points, [top10_acc[i] for i in range(len(top10_acc))], color='palevioletred', marker='x', label='Test Top-10 Acc' ,s=3)
+    a, b, c = np.polyfit(points, top10_acc, 2)
+    plt.plot(points, [a*(x**2) + b*x + c for x in points], color='crimson', label='Test Top-10 Acc (trend)')
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
     plt.title("Accuracy Over Epochs")
@@ -191,6 +196,7 @@ def test(model, test_dl, device, loss_fn):
     pbar.close()
     accuracy = np.array([correct, top3_correct, top5_correct, top10_correct])
     accuracy = accuracy / total
+    print(f"Test Accuracy: Top-1: {accuracy[0]:.4f}, Top-3: {accuracy[1]:.4f}, Top-5: {accuracy[2]:.4f}, Top-10: {accuracy[3]:.4f}")
     # Calculate F1 score for each class
     for j in class_f1.keys():
         precision = class_tps[j] / (class_tps[j] + class_fps[j] + 1e-8)
