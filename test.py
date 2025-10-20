@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     acc_hist = []
     for i in range(5):
-        acc_hist.append(g.test(model, train_dl, device=device, loss_fn=loss_fn)[0])
+        acc_hist.append(g.test(model, test_dl, device=device, loss_fn=loss_fn)[0])
 
     g.plot_acc([0.1, 0.2, 0.3, 0.4, 0.5], acc_hist)
 
