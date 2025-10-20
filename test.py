@@ -92,7 +92,7 @@ if __name__ == "__main__":
     print(f"Training set labels: min {min(labels)}, max {max(labels)}")
     test_ds = dvs.load_combined_ambiguous(train=False)
 
-    bs = 1
+    bs = 32
 
     train_dl = DataLoader(train_ds, batch_size=bs, shuffle=True, collate_fn=lambda x: collate_fn(x))
     test_dl = DataLoader(test_ds, batch_size=bs, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
