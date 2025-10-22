@@ -19,18 +19,28 @@ def test_top_k(model, test_dl):
     top3_correct = 0
     top5_correct = 0
     top10_correct = 0
+    top15_correct = 0
+    top20_correct = 0
+
     with torch.no_grad():
         pbar = tqdm.tqdm(test_dl, desc='Testing', unit='batch')
         for inputs, labels in pbar:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs, _ = model(inputs)
 
+            top_20 = outputs.topk(20, dim=1).indices
+            top_15 = outputs.topk(15, dim=1).indices
             top_10 = outputs.topk(10, dim=1).indices
             top_5 = outputs.topk(5, dim=1).indices
             top_3 = outputs.topk(3, dim=1).indices
             top_1 = outputs.topk(1, dim=1).indices
 
+
             for i in range(labels.size(0)):
+                if labels[i] in top_20[i]:
+                    top20_correct += 1
+                if labels[i] in top_15[i]:
+                    top15_correct += 1
                 if labels[i] in top_10[i]:
                     top10_correct += 1
                 if labels[i] in top_5[i]:
@@ -47,10 +57,14 @@ def test_top_k(model, test_dl):
     top3_acc = top3_correct / total_samples
     top5_acc = top5_correct / total_samples
     top10_acc = top10_correct / total_samples
+    top15_acc = top15_correct / total_samples
+    top20_acc = top20_correct / total_samples
     print(f"Top-1 Accuracy: {top1_acc:.4f}")
     print(f"Top-3 Accuracy: {top3_acc:.4f}")
     print(f"Top-5 Accuracy: {top5_acc:.4f}")
     print(f"Top-10 Accuracy: {top10_acc:.4f}")
+    print(f"Top-15 Accuracy: {top15_acc:.4f}")
+    print(f"Top-20 Accuracy: {top20_acc:.4f}")
 
 def collate_fn(batch, train=True):
     events, labels = zip(*batch)
