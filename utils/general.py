@@ -6,6 +6,7 @@ import torch.nn as nn
 import tqdm
 import snntorch as snn
 import pandas as pd
+import copy
 
 
 def plot_loss(loss_rec, test_loss_rec: list[list], save_name="loss.png"):
@@ -92,7 +93,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
     test_acc_rec = []
     test_f1_rec = []
 
-    best_model = model.clone()
+    best_model = copy.deepcopy(model)
     current_best_acc = 0.0
 
     f1_df = pd.DataFrame(columns=['Epoch'] + [f'Class_{i}_F1' for i in range(75)], index=None)
@@ -137,7 +138,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
 
         if test_acc > current_best_acc:
             current_best_acc = test_acc
-            best_model = model.clone()
+            best_model = copy.deepcopy(model)
             if save_name is not None:
                 torch.save(best_model.state_dict(), save_name + "_best.pth")
                 print(f"New best model saved with accuracy: {current_best_acc[0]:.4f}")
