@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import tqdm
 import snntorch as snn
+import pandas as pd
 
 
 def plot_loss(loss_rec, test_loss_rec: list[list], save_name="loss.png"):
@@ -91,6 +92,11 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
     test_acc_rec = []
     test_f1_rec = []
 
+    best_model = model.clone()
+    current_best_acc = 0.0
+
+    f1_df = pd.DataFrame(columns=['Epoch'] + [f'Class_{i}_F1' for i in range(75)], index=None)
+
     for epoch in range(epochs):
         total_loss = 0.0
         total_acc = 0.0
@@ -128,6 +134,25 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         test_loss_rec.append(np.mean(test_loss))
         test_f1_rec.append(test_f1)
         lr_scheduler.step(np.mean(test_loss))
+
+        if test_acc > current_best_acc:
+            current_best_acc = test_acc
+            best_model = model.clone()
+            if save_name is not None:
+                torch.save(best_model.state_dict(), save_name + "_best.pth")
+                print(f"New best model saved with accuracy: {current_best_acc[0]:.4f}")
+                plot_loss(loss_rec, test_loss_rec, save_name=save_name + "_loss_best.png")
+                plot_acc(acc_rec, test_acc_rec, save_name=save_name + "_acc_best.png")
+                plot_f1(test_f1_rec, save_name=save_name + "_f1_best.png")
+
+        if save_name is not None:
+            f1_df.to_csv(save_name + "_f1_scores.csv", index=False)
+
+        # Save F1 scores to dataframe
+        f1_row = {'Epoch': epoch + 1}
+        for class_idx in range(len(test_f1)):
+            f1_row[f'Class_{class_idx}_F1'] = test_f1[class_idx]
+        f1_df = f1_df.append(f1_row, ignore_index=True)
     print("Training complete.")
     
     if save_name is None:
@@ -135,11 +160,11 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         plot_acc(acc_rec, test_acc_rec)
         plot_f1(test_f1_rec)
     else:
-        plot_loss(loss_rec, test_loss_rec, save_name=save_name+"_loss.png")
-        plot_acc(acc_rec, test_acc_rec, save_name=save_name+"_acc.png")
-        plot_f1(test_f1_rec, save_name=save_name+"_f1.png")
+        plot_loss(loss_rec, test_loss_rec, save_name=save_name+"_loss_final.png")
+        plot_acc(acc_rec, test_acc_rec, save_name=save_name+"_acc_final.png")
+        plot_f1(test_f1_rec, save_name=save_name+"_f1_final.png")
 
-    return model
+    return best_model, f1_df
 
 def test(model, test_dl, device, loss_fn):
     model.to(device)

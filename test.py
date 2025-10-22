@@ -11,6 +11,7 @@ import tqdm
 import utils.general as g
 import torch.nn as nn
 import torchvision.transforms as transforms
+import pandas as pd
 
 import matplotlib.pyplot as plt
 
@@ -115,7 +116,9 @@ if __name__ == "__main__":
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     print(f"Using loss function: {loss_fn}")
 
-    model = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=30, save_name="w_1fc", weight_decay=1e-4)
+    save_name = "w_2fc"
+
+    model, f1_df = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=30, save_name=save_name, weight_decay=1e-4)
 
     # acc_hist = []
     # for i in range(5):
@@ -123,4 +126,5 @@ if __name__ == "__main__":
 
     # g.plot_acc([0.1, 0.2, 0.3, 0.4, 0.5], acc_hist)
 
-    torch.save(model.state_dict(), "w_1fc.pth")
+    f1_df.to_csv(save_name + "_f1_scores.csv", index=False)
+    torch.save(model.state_dict(), save_name + ".pth")
