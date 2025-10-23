@@ -141,7 +141,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
             best_model = copy.deepcopy(model)
             if save_name is not None:
                 torch.save(best_model.state_dict(), save_name + "_best.pth")
-                print(f"New best model saved with accuracy: {current_best_acc[0]:.4f}")
+                print(f"New best model saved with accuracy: {current_best_acc:.4f}")
                 plot_loss(loss_rec, test_loss_rec, save_name=save_name + "_loss_best.png")
                 plot_acc(acc_rec, test_acc_rec, save_name=save_name + "_acc_best.png")
                 plot_f1(test_f1_rec, save_name=save_name + "_f1_best.png")
