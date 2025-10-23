@@ -137,7 +137,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         lr_scheduler.step(np.mean(test_loss))
 
         if test_acc[0] > current_best_acc:
-            current_best_acc = test_acc
+            current_best_acc = test_acc[0]
             best_model = copy.deepcopy(model)
             if save_name is not None:
                 torch.save(best_model.state_dict(), save_name + "_best.pth")
