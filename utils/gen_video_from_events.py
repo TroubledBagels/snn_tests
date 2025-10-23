@@ -1,5 +1,5 @@
 import tonic
-import load_dvs_lips as dvs
+# import load_dvs_lips as dvs
 
 import numpy as np
 import cv2
@@ -114,12 +114,12 @@ def play_in_window(video_path, scale=2.0):
                 return
         cap.release()
 
-if __name__ == "__main__":
-    ds = sorted(dvs.get_dataset(train=True), key=lambda x: x[1])
-    # get random sample
-    for i in range(len(ds)):
-        if ds[i][1] == 87:
-            sample = ds[i+31]
-            break
-    gen_video_from_events(sample, "test_vid.mp4", target_time=2.0, fps=60, fade_time=0.2)
-    play_in_window("test_vid.mp4", scale=4.0)
+# if __name__ == "__main__":
+#     ds = sorted(dvs.get_dataset(train=True), key=lambda x: x[1])
+#     # get random sample
+#     for i in range(len(ds)):
+#         if ds[i][1] == 87:
+#             sample = ds[i+31]
+#             break
+#     gen_video_from_events(sample, "test_vid.mp4", target_time=2.0, fps=60, fade_time=0.2)
+#     play_in_window("test_vid.mp4", scale=4.0)

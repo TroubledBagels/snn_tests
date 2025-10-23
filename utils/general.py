@@ -153,7 +153,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
         f1_row = {'Epoch': epoch + 1}
         for class_idx in range(len(test_f1)):
             f1_row[f'Class_{class_idx}_F1'] = test_f1[class_idx]
-        f1_df = f1_df.append(f1_row, ignore_index=True)
+        f1_df = pd.concat([f1_df, pd.DataFrame([f1_row])], ignore_index=True)
     print("Training complete.")
     
     if save_name is None:
