@@ -16,6 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from utils.load_dvs_lips import load_combined_ambiguous
+import sys
 
 
 def collate_fn(batch, train=True):
@@ -113,6 +114,10 @@ if __name__ == "__main__":
     model = SimpleRecModel(in_c=1, out_c=top_label-bottom_label)
     print(model)
     # loss_fn = snn.functional.ce_count_loss()
+    if len(sys.argv) > 1:
+        model.load_state_dict(torch.load(sys.argv[1], map_location=device))
+        print(f"Loaded model weights from {sys.argv[1]}")
+    model.to(device)
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     print(f"Using loss function: {loss_fn}")
 

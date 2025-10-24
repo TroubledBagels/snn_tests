@@ -15,8 +15,6 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-import sys
-
 from utils.load_dvs_lips import load_combined_ambiguous
 
 
@@ -113,10 +111,6 @@ if __name__ == "__main__":
     print(f"Number of new entries after fade (ish): {(sample != 0).sum() - (sample == 1).sum() - (sample == -1).sum()}")
 
     model = SimpleConvModel(in_c=1, out_c=top_label-bottom_label)
-    if len(sys.argv) > 1:
-        model.load_state_dict(torch.load(sys.argv[1], map_location=device))
-        print(f"Loaded model weights from {sys.argv[1]}")
-    model.to(device)
     print(model)
     # loss_fn = snn.functional.ce_count_loss()
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
