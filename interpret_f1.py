@@ -137,8 +137,11 @@ def create_f1_grid(f1_scores, grid_shape=(8, 10)):
 
 
 if __name__ == "__main__":
-    test_f1 = np.random.random(75)
-    img = create_f1_grid(test_f1.reshape(1, -1))
+    test_f1 = pd.read_csv("outputs 3/w_2fc_f1_scores.csv", index_col=0)
+    print(test_f1)
+    amb_f1 = get_ambiguous(test_f1)
+    last_epoch = amb_f1.iloc[-1]
+    img = create_f1_grid(last_epoch.values.reshape(1, -1))
+    cv2.imwrite("./imgs/f1_grid.png", img)
     cv2.imshow("F1 Score Grid", img)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()

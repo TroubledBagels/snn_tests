@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
     save_name = "rec_1"
 
-    model, f1_df = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=30, save_name=save_name, weight_decay=1e-4)
+    model, f1_df = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=2e-3, epochs=120, save_name=save_name, weight_decay=1e-4)
 
     # acc_hist = []
     # for i in range(5):
