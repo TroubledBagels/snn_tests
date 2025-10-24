@@ -84,7 +84,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimiser)
     print(f"Using optimiser: {optimiser}")
     model.to(device)
-    print(f"Model training on {device}...")
+    print(f"Model training on {device} for {epochs} epochs...")
     model.train()
 
     loss_rec = []
