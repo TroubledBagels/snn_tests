@@ -9,7 +9,7 @@ import tonic.functional
 import torchvision.transforms as transforms
 import utils.general as g
 import utils.load_dvs_lips as dvs
-import sysß
+import sys
 
 def test_top_k(model, test_dl):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
