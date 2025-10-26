@@ -9,6 +9,7 @@ import tonic.functional
 import torchvision.transforms as transforms
 import utils.general as g
 import utils.load_dvs_lips as dvs
+import sysß
 
 def test_top_k(model, test_dl):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -116,7 +117,10 @@ def collate_fn(batch, train=True):
 if __name__ == "__main__":
     model = SC.SimpleConvModel(in_c=1, out_c=75)
     # load model
-    model.load_state_dict(torch.load('./outputs/windowed.pth', map_location=torch.device('cpu')))
+    name = './outputs/windowed.pth'
+    if len(sys.argv) > 1:
+        name = sys.argv[1]
+    model.load_state_dict(torch.load(name, map_location=torch.device('cpu')))
     test_ds = dvs.load_combined_ambiguous(train=False)
     test_dl = DataLoader(test_ds, batch_size=32, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
     test_top_k(model, test_dl)
