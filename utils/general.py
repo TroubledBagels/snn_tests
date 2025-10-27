@@ -233,7 +233,7 @@ def test(model, test_dl, device, loss_fn):
                 class_fps[j] += ((preds == j) & (labels != j)).sum().item()
                 class_fns[j] += ((preds != j) & (labels == j)).sum().item()
             pbar.set_description(f"Testing Batch {i+1}, Loss: {sum(test_loss)/len(test_loss):.4f}, Testing Acc: {correct/total:.4f}")
-        break
+            break
     pbar.close()
     accuracy = np.array([correct, top3_correct, top5_correct, top10_correct])
     accuracy = accuracy / total
