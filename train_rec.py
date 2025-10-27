@@ -7,6 +7,7 @@ import numpy as np
 import tonic
 from torch.utils.data import DataLoader
 from models.SimpleRec import SimpleRecModel
+from models.RecurrentTwo import RecurrentTwoModel
 import tqdm
 import utils.general as g
 import torch.nn as nn
@@ -111,7 +112,7 @@ if __name__ == "__main__":
     print(f"Total Nonzero Entries: {(sample != 0).sum()}")
     print(f"Number of new entries after fade (ish): {(sample != 0).sum() - (sample == 1).sum() - (sample == -1).sum()}")
 
-    model = SimpleRecModel(in_c=1, out_c=top_label-bottom_label)
+    model = RecurrentTwoModel(in_c=1, out_c=top_label-bottom_label)
     print(model)
     # loss_fn = snn.functional.ce_count_loss()
     if len(sys.argv) > 1:
