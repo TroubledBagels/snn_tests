@@ -3,86 +3,105 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-def get_word(idx):
-    new_labels = {
-        'accused': 0,
-        'action': 1,
-        'allow': 2,
-        'america': 3,
-        'another': 4,
-        'around': 5,
-        'attacks': 6,
-        'banks': 7,
-        'become': 8,
-        'being': 9,
-        'benefit': 10,
-        'between': 11,
-        'billion': 12,
-        'called': 13,
-        'capital': 14,
-        'challenge': 15,
-        'chief': 16,
-        'couple': 17,
-        'death': 18,
-        'described': 19,
-        'difference': 20,
-        'during': 21,
-        'economic': 22,
-        'education': 23,
-        'england': 24,
-        'evening': 25,
-        'everything': 26,
-        'exactly': 27,
-        'general': 28,
-        'germany': 29,
-        'happen': 30,
-        'having': 31,
-        'house': 32,
-        'hundreds': 33,
-        'immigration': 34,
-        'judge': 35,
-        'labour': 36,
-        'leaders': 37,
-        'legal': 38,
-        'london': 39,
-        'majority': 40,
-        'meeting': 41,
-        'military': 42,
-        'minutes': 43,
-        'needs': 44,
-        'number': 45,
-        'perhaps': 46,
-        'point': 47,
-        'potential': 48,
-        'press': 49,
-        'question': 50,
-        'really': 51,
-        'right': 52,
-        'russia': 53,
-        'saying': 54,
-        'security': 55,
-        'several': 56,
-        'should': 57,
-        'significant': 58,
-        'spend': 59,
-        'started': 60,
-        'still': 61,
-        'support': 62,
-        'syria': 63,
-        'taken': 64,
-        'terms': 65,
-        'thing': 66,
-        'tomorrow': 67,
-        'under': 68,
-        'warning': 69,
-        'water': 70,
-        'welcome': 71,
-        'words': 72,
-        'years': 73,
-        'young': 74
-    }
+LABELS = {
+    'accused': 0,
+    'action': 1,
+    'allow': 2,
+    'america': 3,
+    'another': 4,
+    'around': 5,
+    'attacks': 6,
+    'banks': 7,
+    'become': 8,
+    'being': 9,
+    'benefit': 10,
+    'between': 11,
+    'billion': 12,
+    'called': 13,
+    'capital': 14,
+    'challenge': 15,
+    'chief': 16,
+    'couple': 17,
+    'death': 18,
+    'described': 19,
+    'difference': 20,
+    'during': 21,
+    'economic': 22,
+    'education': 23,
+    'england': 24,
+    'evening': 25,
+    'everything': 26,
+    'exactly': 27,
+    'general': 28,
+    'germany': 29,
+    'happen': 30,
+    'having': 31,
+    'house': 32,
+    'hundreds': 33,
+    'immigration': 34,
+    'judge': 35,
+    'labour': 36,
+    'leaders': 37,
+    'legal': 38,
+    'london': 39,
+    'majority': 40,
+    'meeting': 41,
+    'military': 42,
+    'minutes': 43,
+    'needs': 44,
+    'number': 45,
+    'perhaps': 46,
+    'point': 47,
+    'potential': 48,
+    'press': 49,
+    'question': 50,
+    'really': 51,
+    'right': 52,
+    'russia': 53,
+    'saying': 54,
+    'security': 55,
+    'several': 56,
+    'should': 57,
+    'significant': 58,
+    'spend': 59,
+    'started': 60,
+    'still': 61,
+    'support': 62,
+    'syria': 63,
+    'taken': 64,
+    'terms': 65,
+    'thing': 66,
+    'tomorrow': 67,
+    'under': 68,
+    'warning': 69,
+    'water': 70,
+    'welcome': 71,
+    'words': 72,
+    'years': 73,
+    'young': 74
+}
 
-    return list(new_labels.keys())[idx]
+def get_word(idx):
+
+    return list(LABELS.keys())[idx]
+
+def get_number(word):
+    return LABELS[word]
+
+def plot_from_classes(f1_scores, class_idx):
+    plt.figure(figsize=(10, 10))
+    num_epochs = len(f1_scores)
+    epochs = range(num_epochs)
+    for idx in class_idx:
+        cur_f1 = f1_scores[f"Class_{idx}_F1"]
+        plt.scatter(epochs, cur_f1, label=get_word(idx))
+        plt.plot(np.convolve(cur_f1, np.ones(10)/int(10), mode='valid'), color='blue', label=f'Smoothed {get_word(idx)}')
+
+    plt.title('F1 Score per Class over Epochs')
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.ylabel('F1 Score')
+    plt.show()
 
 def plot_f1_scores(f1_scores, class_names):
     # F1 scores: Epoch x Classes x 1 (score)
@@ -135,12 +154,14 @@ def create_f1_grid(f1_scores, grid_shape=(8, 10)):
     return f1_image
 
 
-
 if __name__ == "__main__":
-    test_f1 = pd.read_csv("outputs 3/w_2fc_f1_scores.csv", index_col=0)
+    test_f1 = pd.read_csv("outputs 5/w_2fc_f1_scores.csv", index_col=0)
+    # req_words = ['london', 'leaders', 'saying', 'years', 'started', 'minutes', 'england', 'during']
+    # req_list = [get_number(word) for word in req_words]
+    # plot_from_classes(test_f1, req_list)
     print(test_f1)
     amb_f1 = get_ambiguous(test_f1)
-    last_epoch = amb_f1.iloc[-1]
+    last_epoch = test_f1.iloc[-1]
     img = create_f1_grid(last_epoch.values.reshape(1, -1))
     cv2.imwrite("./imgs/f1_grid.png", img)
     cv2.imshow("F1 Score Grid", img)

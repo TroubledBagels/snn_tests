@@ -116,11 +116,12 @@ def collate_fn(batch, train=True):
 
 if __name__ == "__main__":
     model = SC.SimpleConvModel(in_c=1, out_c=75)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # load model
-    name = './outputs/windowed.pth'
+    name = './outputs 4/w_2fc_best.pth'
     if len(sys.argv) > 1:
         name = sys.argv[1]
-    model.load_state_dict(torch.load(name, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(name, map_location=device))
     test_ds = dvs.load_combined_ambiguous(train=False)
     test_dl = DataLoader(test_ds, batch_size=32, shuffle=False, collate_fn=lambda x: collate_fn(x, train=False))
     test_top_k(model, test_dl)
