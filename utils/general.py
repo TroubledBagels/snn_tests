@@ -132,7 +132,6 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
             acc_rec.append(avg_acc)
 
             pbar.set_description(f"Epoch {epoch + 1}, Batch {i + 1}, Loss: {avg_loss:.4f}, Train Acc: {avg_acc:.4f}")
-            break
         pbar.close()
         test_acc, test_loss, test_f1, test_rec, test_prec = test(model, test_dl, device, loss_fn)
         test_acc_rec.append(test_acc)
@@ -233,7 +232,6 @@ def test(model, test_dl, device, loss_fn):
                 class_fps[j] += ((preds == j) & (labels != j)).sum().item()
                 class_fns[j] += ((preds != j) & (labels == j)).sum().item()
             pbar.set_description(f"Testing Batch {i+1}, Loss: {sum(test_loss)/len(test_loss):.4f}, Testing Acc: {correct/total:.4f}")
-            break
     pbar.close()
     accuracy = np.array([correct, top3_correct, top5_correct, top10_correct])
     accuracy = accuracy / total
