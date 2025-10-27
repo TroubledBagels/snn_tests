@@ -3,6 +3,7 @@ import torch.nn as nn
 import utils.general as g
 import numpy as np
 import pandas as pd
+import sys
 
 from models import SimpleConv as SC
 from torch.utils.data import DataLoader
@@ -61,6 +62,8 @@ def collate_fn(batch, train=True):
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model_name = "./outputs 5/w_2fc_best.pth"
+    if len(sys.argv) > 1:
+        model_name = sys.argv[1]
     net = SC.SimpleConvModel(1, 75)
     net.load_state_dict(torch.load(model_name, map_location=device))
 
