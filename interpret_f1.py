@@ -179,14 +179,19 @@ def create_f1_grid(f1_scores, grid_shape=None):
     return f1_image
 
 if __name__ == "__main__":
-    test_f1 = pd.read_csv("outputs 5/w_2fc_f1_scores.csv", index_col=0)
-    # req_words = ['london', 'leaders', 'saying', 'years', 'started', 'minutes', 'england', 'during']
-    # req_list = [get_number(word) for word in req_words]
-    # plot_from_classes(test_f1, req_list)
+    test_f1 = pd.read_csv("outputs 6/single_f1.csv", index_col=0)
+    test_rec = pd.read_csv("outputs 6/single_recall.csv", index_col=0)
+    test_prec = pd.read_csv("outputs 6/single_precision.csv", index_col=0)
     print(test_f1)
     amb_f1 = get_ambiguous(test_f1)
     last_epoch = amb_f1.iloc[-1]
     img = create_f1_grid(last_epoch.values.reshape(1, -1))
     cv2.imwrite("./imgs/f1_grid.png", img)
     cv2.imshow("F1 Score Grid", img)
+    img = create_f1_grid(test_prec.values.reshape(1, -1))
+    cv2.imwrite("./imgs/precision_grid.png", img)
+    cv2.imshow("Precision Grid", img)
+    img = create_f1_grid(test_rec.values.reshape(1, -1))
+    cv2.imwrite("./imgs/recall_grid.png", img)
+    cv2.imshow("Recall Grid", img)
     cv2.waitKey(0)

@@ -79,17 +79,17 @@ if __name__ == '__main__':
     print(f"Test Acc Top-10: {test_acc[3]:.4f}")
     print(f"Test Loss: {np.mean(test_loss):.4f}")
 
-    te_f1 = {}
-    te_rec = {}
-    te_prec = {}
+    te_f1 = {'Epoch': 1}
+    te_rec = {'Epoch': 1}
+    te_prec = {'Epoch': 1}
     for i in range(len(test_f1)):
         te_f1[f'Class_{i}_F1'] = test_f1[i]
         te_rec[f'Class_{i}_Rec'] = test_rec[i]
         te_prec[f'Class_{i}_Prec'] = test_prec[i]
 
-    f1_df = pd.DataFrame(te_f1, index=[1], columns=['Epoch'] + [f'Class_{i}_F1' for i in range(len(test_f1))])
-    rec_df = pd.DataFrame(te_rec, index=[1], columns=['Epoch'] + [f'Class_{i}_Rec' for i in range(len(test_rec))])
-    prec_df = pd.DataFrame(te_prec, index=[1], columns=['Epoch'] + [f'Class_{i}_Prec' for i in range(len(test_prec))])
+    f1_df = pd.DataFrame(te_f1, index=None, columns=['Epoch'] + [f'Class_{i}_F1' for i in range(len(test_f1))])
+    rec_df = pd.DataFrame(te_rec, index=None, columns=['Epoch'] + [f'Class_{i}_Rec' for i in range(len(test_rec))])
+    prec_df = pd.DataFrame(te_prec, index=None, columns=['Epoch'] + [f'Class_{i}_Prec' for i in range(len(test_prec))])
     print("F1 Scores per class:")
     print(f1_df)
     print("Recall per class:")
@@ -97,8 +97,8 @@ if __name__ == '__main__':
     print("Precision per class:")
     print(prec_df)
 
-    f1_df.to_csv(f"single_f1.csv")
-    rec_df.to_csv(f"single_recall.csv")
-    prec_df.to_csv(f"single_precision.csv")
+    f1_df.to_csv(f"single_f1.csv", index=False)
+    rec_df.to_csv(f"single_recall.csv", index=False)
+    prec_df.to_csv(f"single_precision.csv", index=False)
 
 
