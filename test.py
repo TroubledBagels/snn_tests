@@ -133,6 +133,7 @@ if __name__ == "__main__":
     print(f"Class counts: {cc}")
     cc = torch.tensor(list(cc))
     weights = (cc.sum() / (len(cc) * cc))
+    print(f"Class weights: {weights}")
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1, weight=weights.to(device))
     print(f"Using loss function: {loss_fn}")
 
