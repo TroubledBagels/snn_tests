@@ -80,6 +80,15 @@ def density_box_plot(ds):
     plt.xlabel("Density")
     plt.show()
 
+def get_class_count(ds, num_classes):
+    class_count = [0] * num_classes
+    for i in range(len(ds)):
+        _, label = ds[i]
+        class_count[label] += 1
+        if i % 500 == 0:
+            print(f"Processed {i}/{len(ds)} samples for class count.")
+    return class_count
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = "cuda:0"
@@ -119,7 +128,12 @@ if __name__ == "__main__":
     model.to(device)
     print(model)
     # loss_fn = snn.functional.ce_count_loss()
-    loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
+
+    cc = get_class_count(train_ds, top_label - bottom_label)
+    print(f"Class counts: {cc}")
+    cc = torch.tensor(list(cc))
+    weights = (cc.sum() / (len(cc) * cc))
+    loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1, weight=weights.to(device))
     print(f"Using loss function: {loss_fn}")
 
     save_name = "w_2fc"

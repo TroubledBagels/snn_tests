@@ -184,7 +184,7 @@ if __name__ == "__main__":
     test_prec = pd.read_csv("outputs 6/single_precision.csv", index_col=0)
     print(test_f1)
     amb_f1 = get_ambiguous(test_f1)
-    last_epoch = amb_f1.iloc[-1]
+    last_epoch = test_f1.iloc[-1]
     img = create_f1_grid(last_epoch.values.reshape(1, -1))
     cv2.imwrite("./imgs/f1_grid.png", img)
     cv2.imshow("F1 Score Grid", img)
