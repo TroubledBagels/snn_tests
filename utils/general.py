@@ -255,7 +255,9 @@ def test(model, test_dl, device, loss_fn):
         print("Recall:   ", " ".join(f"{class_recall[c]:>5.4f}" for c in line_classes))
     print(f"Mean F1 Score: {sum(class_f1.values())/len(class_f1):.4f}")
     class_f1_scores = [class_f1[c] for c in sorted(class_f1.keys())]
-    return accuracy, test_loss, class_f1_scores
+    class_rec_scores = [class_recall[c] for c in sorted(class_recall.keys())]
+    class_prec_scores = [class_precision[c] for c in sorted(class_precision.keys())]
+    return accuracy, test_loss, class_f1_scores, class_rec_scores, class_prec_scores
 
 def add_event_fade(frames: list[torch.Tensor], decay: float = 0.9):
     fade_map = torch.zeros(frames[0].shape[1:4]) # H x W
