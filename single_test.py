@@ -78,14 +78,18 @@ if __name__ == '__main__':
     print(f"Test Acc Top-5: {test_acc[2]:.4f}")
     print(f"Test Acc Top-10: {test_acc[3]:.4f}")
     print(f"Test Loss: {np.mean(test_loss):.4f}")
-    f1_df = pd.DataFrame(test_f1, index=[1], columns=[f'Class_{i}_F1' for i in range(len(test_f1))])
-    rec_df = pd.DataFrame(test_rec, index=[1], columns=[f'Class_{i}_Rec' for i in range(len(test_rec))])
-    prec_df = pd.DataFrame(test_prec, index=[1], columns=[f'Class_{i}_Prec' for i in range(len(test_prec))])
+    f1_df = pd.DataFrame(np.array(test_f1).T, index=[1], columns=[f'Class_{i}_F1' for i in range(len(test_f1))])
+    rec_df = pd.DataFrame(np.array(test_rec).T, index=[1], columns=[f'Class_{i}_Rec' for i in range(len(test_rec))])
+    prec_df = pd.DataFrame(np.array(test_prec).T, index=[1], columns=[f'Class_{i}_Prec' for i in range(len(test_prec))])
     print("F1 Scores per class:")
     print(f1_df)
     print("Recall per class:")
     print(rec_df)
     print("Precision per class:")
     print(prec_df)
+
+    f1_df.to_csv(f"single_f1.csv")
+    rec_df.to_csv(f"single_recall.csv")
+    prec_df.to_csv(f"single_precision.csv")
 
 
