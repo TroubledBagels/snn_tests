@@ -77,7 +77,7 @@ if __name__ == '__main__':
     print(f"Test Acc Top-3: {test_acc[1]:.4f}")
     print(f"Test Acc Top-5: {test_acc[2]:.4f}")
     print(f"Test Acc Top-10: {test_acc[3]:.4f}")
-    print(f"Test Loss: {test_loss:.4f}")
+    print(f"Test Loss: {np.mean(test_loss):.4f}")
     f1_df = pd.DataFrame(test_f1, index=[1], columns=[f'Class_{i}_F1' for i in range(len(test_f1))])
     rec_df = pd.DataFrame(test_rec, index=[1], columns=[f'Class_{i}_Rec' for i in range(len(test_rec))])
     prec_df = pd.DataFrame(test_prec, index=[1], columns=[f'Class_{i}_Prec' for i in range(len(test_prec))])
