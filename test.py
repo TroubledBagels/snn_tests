@@ -97,7 +97,7 @@ if __name__ == "__main__":
     bottom_label = 0
     top_label = 75
 
-    train_ds = dvs.load_combined_ambiguous(train=True)[:32]
+    train_ds = dvs.load_combined_ambiguous(train=True)
     density_box_plot(train_ds)
     # Print the highest and lowest labels in the training set
     labels = [label for _, label in train_ds]
