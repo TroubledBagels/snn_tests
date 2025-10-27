@@ -166,7 +166,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
             rec_df.to_csv(save_name + "_recall_scores.csv", index=False)
             prec_df.to_csv(save_name + "_precision_scores.csv", index=False)
 
-        lr_rec.append(lr_scheduler.get_lr())
+        lr_rec.append(lr_scheduler.get_last_lr())
     print("Training complete.")
     
     if save_name is None:
