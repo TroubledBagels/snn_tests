@@ -92,11 +92,14 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
     acc_rec = []
     test_acc_rec = []
     test_f1_rec = []
+    lr_rec = []
 
     best_model = copy.deepcopy(model)
     current_best_acc = 0.0
 
     f1_df = pd.DataFrame(columns=['Epoch'] + [f'Class_{i}_F1' for i in range(75)], index=None)
+    rec_df = pd.DataFrame(columns=['Epoch'] + [f'Class_{i}_Rec' for i in range(75)], index=None)
+    prec_df = pd.DataFrame(columns=['Epoch'] + [f'Class_{i}_Prec' for i in range(75)], index=None)
 
     for epoch in range(epochs):
         total_loss = 0.0
@@ -130,7 +133,7 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
 
             pbar.set_description(f"Epoch {epoch + 1}, Batch {i + 1}, Loss: {avg_loss:.4f}, Train Acc: {avg_acc:.4f}")
         pbar.close()
-        test_acc, test_loss, test_f1 = test(model, test_dl, device, loss_fn)
+        test_acc, test_loss, test_f1, test_rec, test_prec = test(model, test_dl, device, loss_fn)
         test_acc_rec.append(test_acc)
         test_loss_rec.append(np.mean(test_loss))
         test_f1_rec.append(test_f1)
@@ -146,14 +149,24 @@ def train(model, train_dl, test_dl, device, loss_fn=nn.CrossEntropyLoss(), lr=1e
                 plot_acc(acc_rec, test_acc_rec, save_name=save_name + "_acc_best.png")
                 plot_f1(test_f1_rec, save_name=save_name + "_f1_best.png")
 
-        if save_name is not None:
-            f1_df.to_csv(save_name + "_f1_scores.csv", index=False)
-
         # Save F1 scores to dataframe
         f1_row = {'Epoch': epoch + 1}
+        rec_row = {'Epoch': epoch + 1}
+        prec_row = {'Epoch': epoch + 1}
         for class_idx in range(len(test_f1)):
             f1_row[f'Class_{class_idx}_F1'] = test_f1[class_idx]
+            rec_row[f'Class_{class_idx}_F1'] = test_rec[class_idx]
+            prec_row[f'Class_{class_idx}_F1'] = test_prec[class_idx]
         f1_df = pd.concat([f1_df, pd.DataFrame([f1_row])], ignore_index=True)
+        rec_df = pd.concat([rec_df, pd.DataFrame([rec_row])], ignore_index=True)
+        prec_df = pd.concat([prec_df, pd.DataFrame([prec_row])], ignore_index=True)
+
+        if save_name is not None:
+            f1_df.to_csv(save_name + "_f1_scores.csv", index=False)
+            rec_df.to_csv(save_name + "_recall_scores.csv", index=False)
+            prec_df.to_csv(save_name + "_precision_scores.csv", index=False)
+
+        lr_rec.append(lr_scheduler.get_lr())
     print("Training complete.")
     
     if save_name is None:

@@ -81,6 +81,19 @@ LABELS = {
     'young': 74
 }
 
+MPL_COLOURS = [
+    "tab:blue",
+    "tab:orange",
+    "tab:green",
+    "tab:red",
+    "tab:purple",
+    "tab:brown",
+    "tab:pink",
+    "tab:gray",
+    "tab:olive",
+    "tab:cyan"
+]
+
 def get_word(idx):
 
     return list(LABELS.keys())[idx]
@@ -92,10 +105,12 @@ def plot_from_classes(f1_scores, class_idx):
     plt.figure(figsize=(10, 10))
     num_epochs = len(f1_scores)
     epochs = range(num_epochs)
-    for idx in class_idx:
+    for i in range(len(class_idx)):
+        idx = class_idx[i]
         cur_f1 = f1_scores[f"Class_{idx}_F1"]
         plt.scatter(epochs, cur_f1, label=get_word(idx))
-        plt.plot(np.convolve(cur_f1, np.ones(10)/int(10), mode='valid'), color='blue', label=f'Smoothed {get_word(idx)}')
+        # Move convolve forward by 10 epochs to align with original data
+        plt.plot(np.convolve(cur_f1, np.ones(10)/int(10), mode='valid'), color=MPL_COLOURS[i % len(MPL_COLOURS)], label=f'Smoothed {get_word(idx)}')
 
     plt.title('F1 Score per Class over Epochs')
     plt.legend()
@@ -129,10 +144,20 @@ def get_means(f1_df):
     mean_f1 = f1_df.filter(like='Class_').mean(axis=1)
     return mean_f1
 
-def create_f1_grid(f1_scores, grid_shape=(8, 10)):
+def get_grid_size(num_classes):
+    # Find grid size closest to square (with more columns than rows if not square, and enough cells)
+    side = int(np.ceil(np.sqrt(num_classes)))
+    if side * (side - 1) >= num_classes:
+        return (side, side - 1)
+    else:
+        return (side, side)
+
+def create_f1_grid(f1_scores, grid_shape=None):
     # Use CV2 to generate an image with colour mapping of F1 score magnitude
     # Each cell represents a class with the class number inside it
     num_classes = f1_scores.shape[1]
+    if grid_shape is None:
+        grid_shape = get_grid_size(num_classes)
     cell_height = 100
     cell_width = 150
     grid_height = grid_shape[0] * cell_height
@@ -153,7 +178,6 @@ def create_f1_grid(f1_scores, grid_shape=(8, 10)):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     return f1_image
 
-
 if __name__ == "__main__":
     test_f1 = pd.read_csv("outputs 5/w_2fc_f1_scores.csv", index_col=0)
     # req_words = ['london', 'leaders', 'saying', 'years', 'started', 'minutes', 'england', 'during']
@@ -161,7 +185,7 @@ if __name__ == "__main__":
     # plot_from_classes(test_f1, req_list)
     print(test_f1)
     amb_f1 = get_ambiguous(test_f1)
-    last_epoch = test_f1.iloc[-1]
+    last_epoch = amb_f1.iloc[-1]
     img = create_f1_grid(last_epoch.values.reshape(1, -1))
     cv2.imwrite("./imgs/f1_grid.png", img)
     cv2.imshow("F1 Score Grid", img)
