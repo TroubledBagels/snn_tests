@@ -78,9 +78,18 @@ if __name__ == '__main__':
     print(f"Test Acc Top-5: {test_acc[2]:.4f}")
     print(f"Test Acc Top-10: {test_acc[3]:.4f}")
     print(f"Test Loss: {np.mean(test_loss):.4f}")
-    f1_df = pd.DataFrame(np.array(test_f1).T, index=[1], columns=[f'Class_{i}_F1' for i in range(len(test_f1))])
-    rec_df = pd.DataFrame(np.array(test_rec).T, index=[1], columns=[f'Class_{i}_Rec' for i in range(len(test_rec))])
-    prec_df = pd.DataFrame(np.array(test_prec).T, index=[1], columns=[f'Class_{i}_Prec' for i in range(len(test_prec))])
+
+    te_f1 = {}
+    te_rec = {}
+    te_prec = {}
+    for i in range(len(test_f1)):
+        te_f1[f'Class_{i}_F1'] = test_f1[i]
+        te_rec[f'Class_{i}_Rec'] = test_rec[i]
+        te_prec[f'Class_{i}_Prec'] = test_prec[i]
+
+    f1_df = pd.DataFrame(te_f1, index=[1], columns=['Epoch'] + [f'Class_{i}_F1' for i in range(len(test_f1))])
+    rec_df = pd.DataFrame(te_rec, index=[1], columns=['Epoch'] + [f'Class_{i}_Rec' for i in range(len(test_rec))])
+    prec_df = pd.DataFrame(te_prec, index=[1], columns=['Epoch'] + [f'Class_{i}_Prec' for i in range(len(test_prec))])
     print("F1 Scores per class:")
     print(f1_df)
     print("Recall per class:")
