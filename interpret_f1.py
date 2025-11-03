@@ -130,12 +130,12 @@ def plot_f1_scores(f1_scores, class_names):
     plt.tight_layout()
     plt.show()
 
-def get_ambiguous(f1_df):
+def get_ambiguous(f1_df, suffix="_F1"):
     amb_class_list = [1, 2, 3, 5, 9, 10, 12, 13, 15, 20, 25, 30, 31, 38, 41, 44, 45,
                       49, 53, 59, 63, 64, 65, 66, 72]
     amb_df = pd.DataFrame()
     for num in amb_class_list:
-        class_col = f"Class_{num}_F1"
+        class_col = f"Class_{num}{suffix}"
         amb_df[class_col] = f1_df[class_col]
 
     return amb_df
@@ -152,9 +152,13 @@ def get_grid_size(num_classes):
     else:
         return (side, side)
 
-def create_f1_grid(f1_scores, grid_shape=None):
+def create_f1_grid(f1_scores, grid_shape=None, specified_indices=None):
     # Use CV2 to generate an image with colour mapping of F1 score magnitude
     # Each cell represents a class with the class number inside it
+    if specified_indices is None:
+        class_list = [i for i in range(f1_scores.shape[1])]
+    else:
+        class_list = specified_indices
     num_classes = f1_scores.shape[1]
     if grid_shape is None:
         grid_shape = get_grid_size(num_classes)
@@ -163,10 +167,10 @@ def create_f1_grid(f1_scores, grid_shape=None):
     grid_height = grid_shape[0] * cell_height
     grid_width = grid_shape[1] * cell_width
     f1_image = np.zeros((grid_height, grid_width, 3), dtype=np.uint8)
-    for class_idx in range(num_classes):
-        row = class_idx // grid_shape[1]
-        col = class_idx % grid_shape[1]
-        f1_score = f1_scores[-1, class_idx]  # Last epoch score
+    for i, class_idx in enumerate(class_list):
+        row = i // grid_shape[1]
+        col = i % grid_shape[1]
+        f1_score = f1_scores[-1, i]  # Last epoch score
         color_intensity = int(f1_score * 255)
         color = (0, color_intensity, 255 - color_intensity)  # Green to Red gradient
         top_left = (col * cell_width, row * cell_height)
@@ -179,19 +183,47 @@ def create_f1_grid(f1_scores, grid_shape=None):
     return f1_image
 
 if __name__ == "__main__":
-    test_f1 = pd.read_csv("outputs 6/single_f1.csv", index_col=0)
-    test_rec = pd.read_csv("outputs 6/single_recall.csv", index_col=0)
-    test_prec = pd.read_csv("outputs 6/single_precision.csv", index_col=0)
+    test_f1 = pd.read_csv("outputs 8/w_2fc_f1_scores.csv", index_col=0)
+    test_rec = pd.read_csv("outputs 8/w_2fc_recall_scores.csv", index_col=0)
+    test_prec = pd.read_csv("outputs 8/w_2fc_precision_scores.csv", index_col=0)
     print(test_f1)
+
+    # for i in range(75):
+    #     test_rec[f'Class_{i}_Rec'] = test_rec[f'Class_{i}_F1']
+    #     test_prec[f'Class_{i}_Prec'] = test_prec[f'Class_{i}_F1']
+    # test_rec.to_csv("outputs 8/w_2fc_recall_scores.csv", index=False)
+    # test_prec.to_csv("outputs 8/w_2fc_precision_scores.csv", index=False)
+    #
+    # test_rec.drop(columns=[f'Class_{i}_F1' for i in range(75)], inplace=True)
+    # test_prec.drop(columns=[f'Class_{i}_F1' for i in range(75)], inplace=True)
+    # test_rec.to_csv("outputs 8/w_2fc_recall_scores.csv", index=False)
+    # test_prec.to_csv("outputs 8/w_2fc_precision_scores.csv", index=False)
+
+    target_epoch = 63
+
     amb_f1 = get_ambiguous(test_f1)
-    last_epoch = test_f1.iloc[-1]
-    img = create_f1_grid(last_epoch.values.reshape(1, -1))
+    amb_rec = get_ambiguous(test_rec, "_Rec")
+    amb_prec = get_ambiguous(test_prec, "_Prec")
+    # last_epoch_f1 = amb_f1.iloc[target_epoch]
+    # last_epoch_rec = amb_rec.iloc[target_epoch]
+    # last_epoch_prec = amb_prec.iloc[target_epoch]
+    last_epoch_f1 = test_f1.iloc[target_epoch]
+    last_epoch_rec = test_rec.iloc[target_epoch]
+    last_epoch_prec = test_prec.iloc[target_epoch]
+    img = create_f1_grid(last_epoch_f1.values.reshape(1, -1))
+    # img = create_f1_grid(last_epoch_f1.values.reshape(1, -1), specified_indices=[1, 2, 3, 5, 9, 10, 12, 13, 15, 20, 25, 30, 31, 38, 41, 44, 45,
+    #                   49, 53, 59, 63, 64, 65, 66, 72])
     cv2.imwrite("./imgs/f1_grid.png", img)
     cv2.imshow("F1 Score Grid", img)
-    img = create_f1_grid(test_prec.values.reshape(1, -1))
+    img = create_f1_grid(last_epoch_prec.values.reshape(1, -1))
+    # img = create_f1_grid(last_epoch_prec.values.reshape(1, -1), specified_indices=[1, 2, 3, 5, 9, 10, 12, 13, 15, 20, 25, 30, 31, 38, 41, 44, 45,
+    #                   49, 53, 59, 63, 64, 65, 66, 72])
     cv2.imwrite("./imgs/precision_grid.png", img)
     cv2.imshow("Precision Grid", img)
-    img = create_f1_grid(test_rec.values.reshape(1, -1))
+    img = create_f1_grid(last_epoch_rec.values.reshape(1, -1))
+    # img = create_f1_grid(last_epoch_rec.values.reshape(1, -1), specified_indices=[1, 2, 3, 5, 9, 10, 12, 13, 15, 20, 25, 30, 31, 38, 41, 44, 45,
+    #                   49, 53, 59, 63, 64, 65, 66, 72])
     cv2.imwrite("./imgs/recall_grid.png", img)
     cv2.imshow("Recall Grid", img)
     cv2.waitKey(0)
+

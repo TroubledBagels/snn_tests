@@ -76,7 +76,7 @@ class SimpleConvModel(nn.Module):
         self.dropout1 = nn.Dropout(p=0.35)
         self.lif5 = snn.Leaky(beta=self.beta3, spike_grad=self.spike_grad)
         self.fc2 = nn.Linear(256, out_c)
-        self.lif6 = snn.Leaky(beta=self.beta3, spike_grad=self.spike_grad)
+        self.lif6 = snn.Leaky(beta=self.beta3, spike_grad=self.spike_grad, reset_mechanism="none")
 
 
     def forward(self, x):

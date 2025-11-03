@@ -6,7 +6,7 @@ import numpy as np
 import cv2
 
 if __name__ == "__main__":
-    model_name = "./outputs 5/w_2fc_best.pth"
+    model_name = "./outputs 7/w_2fc_best.pth"
     net = SimpleConvModel(1, 75)
     net.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')))
 

@@ -55,4 +55,6 @@ if __name__ == "__main__":
     x = torch.randn(4, 800, 1, 88, 88)  # Batch size of 4, 800 time steps, 1 channel, 88x88 spatial dimensions
     out, mems = model(x)
     print(out.shape)  # Should output: torch.Size([4, 75])
+    print(model)
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
 
