@@ -121,7 +121,7 @@ class MFCCDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor] | list[tuple[torch.Tensor, torch.Tensor]]:
+    def __getitem__(self, idx):
         if isinstance(idx, slice):
             return [(self.data[i].squeeze(0), self.labels[i].squeeze()) for i in range(*idx.indices(len(self)))]
         elif isinstance(idx, list):
