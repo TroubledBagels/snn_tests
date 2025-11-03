@@ -14,7 +14,7 @@ if __name__ == "__main__":
     print(ds[0][0].shape)
 
     train_ds, test_ds = torch.utils.data.random_split(ds, [int(0.8*len(ds)), len(ds)-int(0.8*len(ds))])
-    trained_ensemble, test_acc = ae.train_ensemble(ensemble, n_c, train_ds, test_ds, num_classifiers=max_classifiers, epochs_per_classifier=5)
+    trained_ensemble, test_acc = ae.train_ensemble(ensemble, n_c, train_ds, test_ds, num_classifiers=max_classifiers, epochs_per_classifier=10)
     torch.save(trained_ensemble.state_dict(), "ada_ensemble_audio.pth")
 
     plt.plot(range(1, max_classifiers+1), test_acc)

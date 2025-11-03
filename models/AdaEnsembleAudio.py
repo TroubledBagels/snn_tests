@@ -164,6 +164,7 @@ def train_ensemble(ensemble_model, c_out, train_ds, test_ds, num_classifiers, ep
         plt.title("Ada Ensemble Audio Classifier Performance")
         plt.grid()
         plt.show()
+        plt.savefig("ada_ensemble_audio.png")
 
     return ensemble_model, test_acc
 
