@@ -150,7 +150,7 @@ def train_ensemble(ensemble_model, c_out, train_ds, test_ds, num_classifiers, ep
         new_test_dl = DataLoader(new_test_ds, batch_size=bs, shuffle=True)
         specific_acc, _ = test_classifier(new_classifier, new_test_dl, c_out)
         print(f"Trained classifier {i+1} with specific accuracy on focused classes: {specific_acc}%")
-        new_classifier.ada_weight = specific_acc
+        new_classifier.ada_weight = specific_acc * (len(miscls) / c_out)  # Weight by accuracy and class proportion
         ensemble_model.add_classifier(new_classifier)
 
         c_acc, miscls = test_classifier(ensemble_model, DataLoader(test_ds, batch_size=bs), c_out)
@@ -164,7 +164,7 @@ def train_ensemble(ensemble_model, c_out, train_ds, test_ds, num_classifiers, ep
         plt.title("Ada Ensemble Audio Classifier Performance")
         plt.grid()
         plt.show()
-        plt.savefig("ada_ensemble_audio.png")
+        plt.savefig("ada_ensemble_audio_2.png")
 
     return ensemble_model, test_acc
 

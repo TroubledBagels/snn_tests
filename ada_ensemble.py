@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     n_c = 99
-    max_classifiers = 20
+    max_classifiers = 100
     ensemble = ae.AdaEnsembleAudio(out_c=n_c, max_classifiers=20)
 
     ds = fd.MFCCDataset()
@@ -22,5 +22,5 @@ if __name__ == "__main__":
     plt.ylabel("Test Accuracy (%)")
     plt.title("Ada Ensemble Audio Classifier Performance")
     plt.grid()
-    plt.savefig("ada_ensemble_performance.png")
+    plt.savefig("ada_ensemble_performance_2.png")
     plt.show()
