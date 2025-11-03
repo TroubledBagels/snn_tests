@@ -81,6 +81,7 @@ class MelSpecDataset(Dataset):
 
 class MFCCDataset(Dataset):
     def __init__(self, source=f"{str(Path.home())}/data/daps-phonemes/"):
+        print(source)
         self.source_path = source
         self.data = []
         self.labels = []
