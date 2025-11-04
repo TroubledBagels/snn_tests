@@ -30,7 +30,7 @@ if __name__ == '__main__':
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
     print(f"Train size: {len(train_ds)}, Test size: {len(test_ds)}")
 
-    num_models = 5
+    num_models = 10
     epochs = 1
 
     part_size = len(full_ds) // num_models

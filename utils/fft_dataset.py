@@ -81,7 +81,6 @@ class MelSpecDataset(Dataset):
 
 class MFCCDataset(Dataset):
     def __init__(self, source=f"{str(Path.home())}/data/daps-phonemes/"):
-        print(source)
         self.source_path = source
         self.data = []
         self.labels = []
@@ -92,7 +91,7 @@ class MFCCDataset(Dataset):
 
         for f in label_files:
             with open(self.source_path+f, 'r') as l:
-                self.str_labels.append(l.readline().strip())
+                self.str_labels.append(l.readline().strip().split('_')[0])
 
         self.sorted_unique = sorted(list(set(self.str_labels)))
         self.max_c = len(self.sorted_unique)
@@ -114,7 +113,7 @@ class MFCCDataset(Dataset):
                 plot_fft(waveform)
             data = mfcc.numpy()
             with open(self.source_path+label_files[i], 'r') as l:
-                str_label = l.readline().strip()
+                str_label = l.readline().strip().split('_')[0]
                 self.labels.append(torch.Tensor([self.sorted_unique.index(str_label)]))
             self.data.append(torch.from_numpy(data).float())
 
@@ -141,3 +140,5 @@ if __name__ == "__main__":
         print(batch[0].shape)
         print(batch[1].shape)
         break
+    print(list(set(dataset.str_labels)))
+    print(len(list(set(dataset.str_labels))))

@@ -6,7 +6,7 @@ import utils.fft_dataset as fd
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    n_c = 99
+    n_c = 38
     max_classifiers = 100
     ensemble = ae.AdaEnsembleAudio(out_c=n_c, max_classifiers=20)
 
