@@ -12,9 +12,11 @@ class BasicClassifier(nn.Module):
         super(BasicClassifier, self).__init__()
         self.conv1 = nn.Conv1d(in_channels=1, out_channels=16, kernel_size=7)
         self.lif1 = snn.Leaky(beta=0.9, spike_grad=surrogate.atan())
-        self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(16 * 24, out_c)
+        self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=5)
         self.lif2 = snn.Leaky(beta=0.9, spike_grad=surrogate.atan())
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(32 * 20, out_c)
+        self.lif3 = snn.Leaky(beta=0.9, spike_grad=surrogate.atan())
         self.ada_weight = 1.0
 
     def forward(self, x):
@@ -22,6 +24,7 @@ class BasicClassifier(nn.Module):
 
         mem1 = self.lif1.init_leaky()
         mem2 = self.lif2.init_leaky()
+        mem3 = self.lif3.init_leaky()
 
         spk_rec = []
 
@@ -29,10 +32,12 @@ class BasicClassifier(nn.Module):
             xt = x[:, :, t]
             xt = self.conv1(xt)
             xt, mem1 = self.lif1(xt, mem1)
+            xt = self.conv2(xt)
+            xt, mem2 = self.lif2(xt, mem2)
             xt = xt.view(B, -1)
             xt = self.fc1(xt)
-            xt, mem2 = self.lif2(xt, mem2)
-            spk_rec.append(mem2)
+            xt, mem3 = self.lif3(xt, mem3)
+            spk_rec.append(mem3)
 
         out = torch.stack(spk_rec).mean(dim=0)
 
@@ -170,11 +175,15 @@ def train_ensemble(ensemble_model, c_out, train_ds, test_ds, num_classifiers, ep
 
 
 if __name__ == "__main__":
-    model = AdaEnsembleAudio(out_c=10, max_classifiers=5)
-    classifier1 = BasicClassifier(out_c=10)
-    classifier2 = BasicClassifier(out_c=10)
+    model = AdaEnsembleAudio(out_c=2, max_classifiers=5)
+    classifier1 = BasicClassifier(out_c=2)
+    classifier2 = BasicClassifier(out_c=2)
     model.add_classifier(classifier1)
     model.add_classifier(classifier2)
+
+    # Print number of parameters in BasicClassifier
+    num_params = sum(p.numel() for p in classifier1.parameters() if p.requires_grad)
+    print("Number of learnable parameters in BasicClassifier:", num_params)
 
     dummy_input = torch.randn(1, 30, 196)
     output = model(dummy_input)

@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import tonic
 from torch.utils.data import DataLoader, random_split
-from models.EnsembleAudio import BaseModel, EnsembleAudioModel
+from models.EnsembleAudio import BaseModel, EnsembleAudioModel, EnsembleMeanModel
 
 import utils.general as g
 import torch.nn as nn
@@ -31,33 +31,42 @@ if __name__ == '__main__':
     print(f"Train size: {len(train_ds)}, Test size: {len(test_ds)}")
 
     num_models = 10
+    removal_amount = 0.2  # Fraction of data to remove for each model
     epochs = 1
-
-    part_size = len(full_ds) // num_models
-    ds_parts = [train_ds[i*part_size:(i+1)*part_size] for i in range(num_models)]
-    models = [BaseModel(out_c=full_ds.max_c).to(device) for _ in range(num_models)]
     trained_models = []
     loss_fn = nn.CrossEntropyLoss()
-    for i, model in enumerate(models):
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-        temp_ds = []
-        for j in range(num_models):
-            if j != i:
-                temp_ds += ds_parts[j]
-        temp_dl = DataLoader(temp_ds, batch_size=batch_size, shuffle=True)
-        print(f"Training model {i+1}/{num_models} on {len(temp_ds)} samples")
-        model, _ = g.train(model, temp_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=epochs, save_name=f"./ensemble/fft_ensemble_model_{i}", weight_decay=1e-4, n_c=full_ds.max_c)
-        trained_models.append(model)
+    train = False
 
-    model = EnsembleAudioModel(trained_models).to(device)
+    if train:
+        part_size = len(full_ds) // num_models
+        ds_parts = [train_ds[i*part_size:(i+1)*part_size] for i in range(num_models)]
+        models = [BaseModel(out_c=full_ds.max_c).to(device) for _ in range(num_models)]
+        for i, model in enumerate(models):
+            optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+            temp_ds = []
+            for j in range(num_models):
+                if i != num_models-1:
+                    if j != i and j != i+1:
+                        temp_ds.extend(ds_parts[j])
+                else:
+                    if j != i and j != 0:
+                        temp_ds.extend(ds_parts[j])
+            temp_dl = DataLoader(temp_ds, batch_size=batch_size, shuffle=True)
+            print(f"Training model {i+1}/{num_models} on {len(temp_ds)} samples")
+            model, _ = g.train(model, temp_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=epochs, save_name=f"./ensemble/fft_ensemble_model_{i}", weight_decay=1e-4, n_c=full_ds.max_c)
+            trained_models.append(model)
+    else:
+        for i in range(num_models):
+            model = BaseModel(out_c=full_ds.max_c).to(device)
+            model.load_state_dict(torch.load(f"./ensemble/fft_ensemble_model_{i}_best.pth", map_location=device))
+            trained_models.append(model)
 
-    if len(sys.argv) > 1:
-        model.load_state_dict(torch.load(sys.argv[1], map_location=device))
-        print(f"Loaded model weights from {sys.argv[1]}")
+    model = EnsembleMeanModel(trained_models).to(device)
+
     model.to(device)
     print(model)
 
-    accuracy, test_loss, class_f1_scores, class_rec_scores, class_prec_scores = g.test_reg(model, test_dl, device, loss_fn=loss_fn)
+    accuracy, test_loss, class_f1_scores, class_rec_scores, class_prec_scores = g.test(model, test_dl, device, loss_fn=loss_fn)
     print(f"Ensemble Test Accuracy: {accuracy}, Test Loss: {test_loss}")
     # model, f1_df = g.train(model, train_dl, test_dl, device, loss_fn=loss_fn, lr=1e-3, epochs=epochs, save_name="fft_simpleaudio", weight_decay=1e-4, n_c=full_ds.max_c)
     # print(f1_df)
