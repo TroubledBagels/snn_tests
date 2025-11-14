@@ -94,24 +94,23 @@ def get_new_label(old_label: str, type: str) -> str:
     glides = ['w', 'y']
     aspirate = ['hh']
 
-    match type:
-        case 'all':
-            return old_label
-        case 'v_or_c':
-            if old_label in vowel_list:
-                return 'vowel'
-            else:
-                return 'consonant'
-        case 'mono_or_di':
-            if old_label in diphthongs:
-                return 'diphthong'
-            elif old_label in short_vowels or old_label in long_vowels:
-                return 'monophthong'
-        case 'short_or_long':
-            if old_label in short_vowels:
-                return 'short'
-            elif old_label in long_vowels:
-                return 'long'
+    if type == 'all':
+        return old_label
+    elif type == 'v_or_c':
+        if old_label in vowel_list:
+            return 'vowel'
+        else:
+            return 'consonant'
+    elif type == 'mono_or_di':
+        if old_label in diphthongs:
+            return 'diphthong'
+        elif old_label in short_vowels or old_label in long_vowels:
+            return 'monophthong'
+    elif type == 'short_or_long':
+        if old_label in short_vowels:
+            return 'short'
+        elif old_label in long_vowels:
+            return 'long'
     return old_label
 
 class MFCCDataset(Dataset):
