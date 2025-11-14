@@ -77,7 +77,7 @@ class BinarySquareModel(nn.Module):
             bclass = BinarySquareClassifier(i, j)
             optimiser = torch.optim.Adam(bclass.parameters(), lr=0.001)
 
-            bclass, acc = train_bclass(bclass, self.train_dataset, self.test_dataset, nn.CrossEntropyLoss(), optimiser, device)
+            bclass, acc = train_bclass(bclass, self.train_dataset, self.test_dataset, None, optimiser, device)
             self.bc_list.append(bclass)
             self.acc_dict[(i, j)] = acc - 0.5  # Center accuracy around 0.5
 
@@ -134,6 +134,16 @@ def train_bclass(model, tr_ds, te_ds, criterion, optimiser, device):
     req_idx = [model.c_1, model.c_2]
     train_dataset = fft_dataset.get_by_labels(tr_ds, req_idx, True)
     test_dataset = fft_dataset.get_by_labels(te_ds, req_idx, True)
+
+    # Calculate class balance
+    if criterion is None:
+        class_counts = [0, 0, 0]
+        for _, label in train_dataset:
+            class_counts[label.item()] += 1
+        total_count = sum(class_counts)
+        class_weights = [total_count / c if c > 0 else 0.0 for c in class_counts]
+        class_weights = torch.tensor(class_weights).to(device)
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
 
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -229,9 +239,9 @@ if __name__ == "__main__":
     # model.acc_dict = acc_d
 
     heatmap_img, classes = utils.heatmap.generate_heatmap(model.acc_dict, ds.sorted_unique)
-    cv2.imwrite("binary_square_heatmap.png", heatmap_img)
+    cv2.imwrite(f"tsquare_heatmap_{c_num}.png", heatmap_img)
     # Display the heatmap
-    cv2.imshow("Binary Square Classifier Heatmap", heatmap_img)
+    cv2.imshow("Ternary Square Classifier Heatmap", heatmap_img)
     cv2.waitKey(0)
     # train_ds, test_ds = torch.utils.data.random_split(ds, [int(0.8 * len(ds)), len(ds) - int(0.8 * len(ds))])
     # test_loader = DataLoader(test_ds, batch_size=1, shuffle=False)
