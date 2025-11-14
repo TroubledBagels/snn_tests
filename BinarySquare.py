@@ -147,7 +147,7 @@ def train_bclass(model, tr_ds, te_ds, criterion, optimiser, device):
         for data, labels in pbar:
             data, labels = data.to(device), labels.to(device)
             optimiser.zero_grad()
-            outputs, _ = model(data)
+            outputs  = model(data)
             loss = criterion(outputs, labels)
             loss.backward()
             optimiser.step()
@@ -160,7 +160,7 @@ def train_bclass(model, tr_ds, te_ds, criterion, optimiser, device):
         pbar = tqdm.tqdm(test_loader, desc="Testing")
         for data, labels in pbar:
             data, labels = data.to(device), labels.to(device)
-            outputs, _ = model(data)
+            outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
@@ -183,7 +183,7 @@ def test_bcs(model):
             pbar = tqdm.tqdm(test_loader, desc=f"Testing Ternary Classifier for classes {bc.c_1} and {bc.c_2}")
             for data, labels in pbar:
                 data, labels = data.to(device), labels.to(device)
-                outputs, _ = bc(data)
+                outputs = bc(data)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
