@@ -139,7 +139,9 @@ def train_bclass(model, tr_ds, te_ds, criterion, optimiser, device):
     if criterion is None:
         class_counts = [0, 0, 0]
         for _, label in train_dataset:
-            class_counts[label.item()] += 1
+            if type(label) == torch.Tensor:
+                label = label.item()
+            class_counts[label] += 1
         total_count = sum(class_counts)
         class_weights = [total_count / c if c > 0 else 0.0 for c in class_counts]
         class_weights = torch.tensor(class_weights).to(device)
