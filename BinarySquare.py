@@ -215,12 +215,12 @@ if __name__ == "__main__":
 
     c_num = 38
 
-    model = BinarySquareModel(c_num, False).to(device)
+    model = BinarySquareModel(c_num, True).to(device)
 
-    # torch.save(model.state_dict(), f"bsquare_{c_num}.pth")
-    model.load_state_dict(torch.load(f"bsquare_{c_num}.pth", map_location=device))
+    torch.save(model.state_dict(), f"tsquare_{c_num}.pth")
+    # model.load_state_dict(torch.load(f"tsquare_{c_num}.pth", map_location=device))
     print(f"num params: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
-    run_sample_and_visualise(model, ds, 28384)
+    # run_sample_and_visualise(model, ds, 28384)
 
     # for i in range(4):
     #     run_sample_and_visualise(model, ds, None)
