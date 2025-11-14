@@ -201,7 +201,7 @@ def test_bcs(model):
         acc_dict[(bc.c_1, bc.c_2)] = accuracy - 0.5 # Center accuracy around 0.5
     return acc_dict
 
-def run_sample_and_visualise(model, ds, sample_idx: int | None = None):
+def run_sample_and_visualise(model, ds, sample_idx = None):
     if sample_idx is None:
         sample_idx = random.randint(0, len(ds) - 1)
     data, label = ds[sample_idx]
