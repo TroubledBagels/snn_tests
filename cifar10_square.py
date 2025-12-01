@@ -59,18 +59,18 @@ if __name__ == '__main__':
     # model.load_from_no_net(no_net_model)
     # model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
 
-    # model.eval()
-    # correct = 0
-    # total = 0
-    # with torch.no_grad():
-    #     for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(te_ds, batch_size=100, shuffle=False)):
-    #         images, labels = images.to(device), labels.to(device)
-    #         outputs, _ = model(images)
-    #         _, predicted = torch.max(outputs.data, 1)
-    #         total += labels.size(0)
-    #         correct += (predicted == labels).sum().item()
-    # print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
-    # torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(te_ds, batch_size=100, shuffle=False)):
+            images, labels = images.to(device), labels.to(device)
+            outputs, _ = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
+    torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
 
     random_idx = random.randint(0, len(te_ds)-1)
     print(f"Random test sample index: {random_idx}")
