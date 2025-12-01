@@ -181,7 +181,7 @@ class BSquareModel(nn.Module):
                 else:
                     # add individual spikes
                     for b in range(B):
-                        if abs(out[b, 0].item() - out[b, 1].item()) > 0.2:
+                        if abs(out[b, 0].item() - out[b, 1].item()) > 0.5:
                             votes[b, c_1] += out[b, 0]
                             votes[b, c_2] += out[b, 1]
                             if B == 1:
