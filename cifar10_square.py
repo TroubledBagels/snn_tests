@@ -33,7 +33,7 @@ if __name__ == '__main__':
         num_layers=3,
         binary_voting=False,
         bclass=CBS.TinyCNN,
-        net_out=True
+        net_out=False
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -41,21 +41,21 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    # model.train_classifiers(tr_ds, te_ds, device=device, epochs=15)
-    saved_weights = torch.load(model_dir, map_location=device)
-    no_net_model = CBS.BSquareModel(
-        num_classes=10,
-        input_size=3,
-        hidden_size=16,
-        num_layers=3,
-        binary_voting=False,
-        bclass=CBS.TinyCNN,
-        net_out=False
-    )
-    no_net_model.to(device)
-    no_net_model.load_state_dict(saved_weights)
-    model.load_from_no_net(no_net_model)
-    model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
+    model.train_classifiers(tr_ds, te_ds, device=device, epochs=20)
+    # saved_weights = torch.load(model_dir, map_location=device)
+    # no_net_model = CBS.BSquareModel(
+    #     num_classes=10,
+    #     input_size=3,
+    #     hidden_size=16,
+    #     num_layers=3,
+    #     binary_voting=False,
+    #     bclass=CBS.TinyCNN,
+    #     net_out=False
+    # )
+    # no_net_model.to(device)
+    # no_net_model.load_state_dict(saved_weights)
+    # model.load_from_no_net(no_net_model)
+    # model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
 
     model.eval()
     correct = 0
