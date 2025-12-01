@@ -68,4 +68,4 @@ if __name__ == '__main__':
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
-    torch.save(model.state_dict(), "./bsquares/cifar10_net_bal.pth")
+    torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
