@@ -249,7 +249,7 @@ class BSquareModel(nn.Module):
                         total += target_binary.size(0)
                         pbar.set_description(f"Evaluating Classifier {classifier.c_1} vs {classifier.c_2}")
                 accuracy = 100 * correct / total
-                print(f"Classifier {classifier.c_1} vs {classifier.c_2} Epoch {epoch} Test Accuracy: {accuracy:.2f}%")
+                print(f"Classifier {classifier.c_1} vs {classifier.c_2} Epoch {epoch+1} Test Accuracy: {accuracy:.2f}%")
                 if cur_best is None or accuracy > cur_best_acc:
                     cur_best = classifier.state_dict()
                     cur_best_acc = accuracy
