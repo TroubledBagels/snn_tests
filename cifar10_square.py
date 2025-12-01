@@ -55,7 +55,7 @@ if __name__ == '__main__':
     no_net_model.to(device)
     no_net_model.load_state_dict(saved_weights)
     model.load_from_no_net(no_net_model)
-    model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3)
+    model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
 
     model.eval()
     correct = 0
