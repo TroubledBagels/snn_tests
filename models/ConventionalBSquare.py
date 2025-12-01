@@ -128,7 +128,7 @@ class TinyCNN(nn.Module):
         x = self.fc1(x)
         x = torch.relu(x)
         x = self.fc2(x)
-        return x
+        return x, None
 
     def get_hidden_weights(self):
         weights = [self.conv2.weight.data.clone(), self.conv3.weight.data.clone(), self.fc1.weight.data.clone()]
