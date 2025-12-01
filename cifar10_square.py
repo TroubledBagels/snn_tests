@@ -75,6 +75,7 @@ if __name__ == '__main__':
     random_idx = random.randint(0, len(te_ds)-1)
     print(f"Random test sample index: {random_idx}")
     sample, label = te_ds[random_idx]
+    sample, label = sample.to(device), label.to(device)
     output, vote_dict = model(sample.unsqueeze(0))
     print(f"Sample output shape: {output.shape}")
     print(f"Label: {label}")
