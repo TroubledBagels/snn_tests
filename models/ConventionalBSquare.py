@@ -152,8 +152,9 @@ class BSquareModel(nn.Module):
             )
             print("Initialized ANN output layer for BSquareModel.")
 
-    def forward(self, x) -> torch.Tensor:
+    def forward(self, x) -> tuple[torch.Tensor, dict]:
         B = x.size(0)
+        vote_dict = {}
         votes = torch.zeros(B, self.num_classes, device=x.device)
         if self.net_out:
             out_list = []
@@ -166,6 +167,7 @@ class BSquareModel(nn.Module):
         else:
             for classifier in self.classifiers:
                 out, _ = classifier(x)
+                out = nn.Softmax(dim=1)(out)
                 c_1, c_2 = classifier.c_1, classifier.c_2
                 if self.binary_voting:
                     preds = out.argmax(dim=1)
@@ -174,15 +176,20 @@ class BSquareModel(nn.Module):
                             votes[b, c_1] += 1
                         else:
                             votes[b, c_2] += 1
+                        if B == 1:
+                            vote_dict[(c_1, c_2)] = (1 if preds[b] == 0 else 0.01, 1 if preds[b] == 1 else 0.01)
                 else:
                     # add individual spikes
                     for b in range(B):
-                        if abs(votes[b, c_1] - votes[b, c_2]) > 0.1:
+                        if abs(out[b, 0].item() - out[b, 1].item()) > 0.1:
                             votes[b, c_1] += out[b, 0]
                             votes[b, c_2] += out[b, 1]
+                            if B == 1:
+                                vote_dict[(c_1, c_2)] = (out[b, 0].item(), out[b, 1].item())
+
                     # votes[:, c_1] += out[:, 0]
                     # votes[:, c_2] += out[:, 1]
-        return votes
+        return votes, vote_dict
 
     def train_classifiers(self, train_ds, test_ds, epochs=3, lr=1e-3, device='cpu'):
         print("Training classifiers...")

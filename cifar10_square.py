@@ -42,7 +42,8 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    accuracy_dict = model.train_classifiers(tr_ds, te_ds, device=device, epochs=20)
+    model.load_state_dict(torch.load(model_dir, map_location=device))
+    # accuracy_dict = model.train_classifiers(tr_ds, te_ds, device=device, epochs=20)
     # saved_weights = torch.load(model_dir, map_location=device)
     # no_net_model = CBS.BSquareModel(
     #     num_classes=10,
@@ -71,6 +72,15 @@ if __name__ == '__main__':
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
     torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
 
+    random_idx = random.randint(0, len(te_ds)-1)
+    print(f"Random test sample index: {random_idx}")
+    sample, label = te_ds[random_idx]
+    output, vote_dict = model(sample.unsqueeze(0))
+    print(f"Sample output shape: {output.shape}")
+    print(f"Label: {label}")
+    print(f"Predicted class: {torch.argmax(output, dim=1).item()}")
+    print(f"Vote dict: {vote_dict}")
+
     num_to_str_label = {
         0: "0",
         1: "1",
@@ -84,5 +94,7 @@ if __name__ == '__main__':
         9: "9"
     }
 
-    heatmap_img, classes = hm.generate_heatmap(accuracy_dict, num_to_str_label, use_acc=True)
+    heatmap_img, classes = hm.generate_heatmap(vote_dict, num_to_str_label, use_acc=False, tuple_based=True)
     cv2.imwrite("heatmap.png", heatmap_img)
+    # cv2.imshow("heatmap", heatmap_img)
+    # cv2.waitKey(0)

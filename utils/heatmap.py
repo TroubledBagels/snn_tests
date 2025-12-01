@@ -17,7 +17,7 @@ def apply_custom_colourmap(im_grey):
     return im_color
 
 
-def generate_heatmap(data, num_to_str_labels, colourmap=cv2.COLORMAP_HOT, use_acc=True):
+def generate_heatmap(data, num_to_str_labels, colourmap=cv2.COLORMAP_HOT, use_acc=True, tuple_based=False):
     # Generates heatmap for the triangle of binary classifiers
     # data is a dictionary of form ((class1, class2): accuracy)
     classes = set()
@@ -34,9 +34,9 @@ def generate_heatmap(data, num_to_str_labels, colourmap=cv2.COLORMAP_HOT, use_ac
         if use_acc:
             heatmap[i, j] = (acc - 0.5) * 2
             heatmap[j, i] = (acc - 0.5) * 2  # Symmetric
-        else:
-            heatmap[i, j] = 1-acc
-            heatmap[j, i] = acc
+        elif tuple_based:
+            heatmap[i, j] = acc[1]
+            heatmap[j, i] = acc[0]
     pixel_size = 25
     # Normalize heatmap to 0-255
     heatmap = (heatmap * 255).astype(np.uint8)
