@@ -6,6 +6,7 @@ import torchvision
 import torchvision.transforms as transforms
 import pathlib
 import tqdm
+import sys
 import random
 import cv2
 import numpy as np
@@ -13,6 +14,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        model_dir = sys.argv[1]
+    else:
+        model_dir = "./bsquares/cifar10_bal.pth"
+
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
     te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=transforms.ToTensor(), download=True)
@@ -36,7 +42,7 @@ if __name__ == '__main__':
 
     loss_fn = nn.CrossEntropyLoss()
     # model.train_classifiers(tr_ds, te_ds, device=device, epochs=15)
-    saved_weights = torch.load("./bsquares/cifar10_bal.pth", map_location=device)
+    saved_weights = torch.load(model_dir, map_location=device)
     no_net_model = CBS.BSquareModel(
         num_classes=10,
         input_size=3,
