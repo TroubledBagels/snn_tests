@@ -98,5 +98,5 @@ if __name__ == '__main__':
 
     heatmap_img, classes = hm.generate_heatmap(vote_dict, num_to_str_label, use_acc=False, tuple_based=True)
     cv2.imwrite("heatmap.png", heatmap_img)
-    cv2.imshow("heatmap", heatmap_img)
-    cv2.waitKey(0)
+    # cv2.imshow("heatmap", heatmap_img)
+    # cv2.waitKey(0)
