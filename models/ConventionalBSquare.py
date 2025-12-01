@@ -211,6 +211,7 @@ class BSquareModel(nn.Module):
 
         print("Training...")
         acc_dict = {}
+        test_loss_dict = {}
         for idx, classifier in enumerate(self.classifiers):
             cl_tr_ds = tr_ds_dict[classifier.c_1] + tr_ds_dict[classifier.c_2]
             shuffle(cl_tr_ds)
@@ -218,6 +219,7 @@ class BSquareModel(nn.Module):
             train_dl = DataLoader(cl_tr_dataset, batch_size=64, shuffle=True)
             cur_best = None
             cur_best_acc = 0.0
+            best_loss = 0.0
 
             cl_te_ds = tl_ds_dict[classifier.c_1] + tl_ds_dict[classifier.c_2]
             cl_te_dataset = ListDataset(cl_te_ds, transform=None)
@@ -241,6 +243,7 @@ class BSquareModel(nn.Module):
 
                 correct = 0
                 total = 0
+                te_loss = 0.0
                 classifier.eval()
                 with torch.no_grad():
                     pbar = tqdm.tqdm(test_dl)
@@ -248,6 +251,7 @@ class BSquareModel(nn.Module):
                         data = data.float()
                         data, target = data.to(device), target.to(device)
                         target_binary = (target == classifier.c_2).long()
+                        te_loss += criterion(output, target_binary).item()
                         output, _ = classifier(data)
                         preds = output.argmax(dim=1)
                         correct += (preds == target_binary).sum().item()
@@ -258,13 +262,15 @@ class BSquareModel(nn.Module):
                 if cur_best is None or accuracy > cur_best_acc:
                     cur_best = classifier.state_dict()
                     cur_best_acc = accuracy
+                    best_loss = te_loss / len(test_dl)
             print(f"Best accuracy for Classifier {classifier.c_1} vs {classifier.c_2}: {cur_best_acc:.2f}%")
             classifier.load_state_dict(cur_best)
             acc_dict[(classifier.c_1, classifier.c_2)] = cur_best_acc
+            test_loss_dict[(classifier.c_1, classifier.c_2)] = best_loss
         print("Finished training all classifiers.")
         print("Classifier accuracies:")
         for key in acc_dict:
-            print(f" Classes {key[0]} vs {key[1]}: {acc_dict[key]:.2f}%")
+            print(f" Classes {key[0]} vs {key[1]}: {acc_dict[key]:.2f}% with loss: {test_loss_dict[key]:.4f}")
         return acc_dict
 
     def get_model_by_classes(self, c_1, c_2):
