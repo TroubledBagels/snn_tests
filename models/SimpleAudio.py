@@ -53,17 +53,12 @@ class SimpleMFCCModel(nn.Module):
     def __init__(self, out_c):
         super(SimpleMFCCModel, self).__init__()
         self.spike_grad = snn.surrogate.atan()
-        self.conv1 = nn.Conv1d(1, 32, 7)
+        self.fc1 = nn.Linear(30, 128)
         self.lif1 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
-        self.conv2 = nn.Conv1d(32, 64, 5)
+        self.fc2 = nn.Linear(128, 256)
         self.lif2 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
-        self.conv3 = nn.Conv1d(64, 64, 3)
+        self.fc3 = nn.Linear(256, out_c)
         self.lif3 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
-        self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(18 * 64, 128)
-        self.lif4 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
-        self.fc2 = nn.Linear(128, out_c)
-        self.lif5 = snn.Leaky(beta=0.9, spike_grad=self.spike_grad)
 
     def forward(self, x):
         B, C, T = x.shape
@@ -71,29 +66,21 @@ class SimpleMFCCModel(nn.Module):
         mem1 = self.lif1.init_leaky()
         mem2 = self.lif2.init_leaky()
         mem3 = self.lif3.init_leaky()
-        mem4 = self.lif4.init_leaky()
-        mem5 = self.lif5.init_leaky()
 
         spk_rec = []
-
         for t in range(T):
             xt = x[:, :, t]
-            xt = self.conv1(xt)
-            xt, mem1 = self.lif1(xt, mem1)
-            xt = self.conv2(xt)
-            xt, mem2 = self.lif2(xt, mem2)
-            xt = self.conv3(xt)
-            xt, mem3 = self.lif3(xt, mem3)
-            xt = xt.view(B, -1)
             xt = self.fc1(xt)
-            xt, mem4 = self.lif4(xt, mem4)
+            xt, mem1 = self.lif1(xt, mem1)
             xt = self.fc2(xt)
-            xt, mem5 = self.lif5(xt, mem5)
-            spk_rec.append(mem5)
+            xt, mem2 = self.lif2(xt, mem2)
+            xt = self.fc3(xt)
+            xt, mem3 = self.lif3(xt, mem3)
+            spk_rec.append(mem3)
 
         out = torch.stack(spk_rec).mean(dim=0)
 
-        return out, (mem1, mem2, mem3, mem4)
+        return out, (mem1, mem2, mem3)
 
 class RegMFCCModel(nn.Module):
     def __init__(self, out_c):
@@ -129,8 +116,8 @@ class RegMFCCModel(nn.Module):
         return x
 
 if __name__ == "__main__":
-    model = RegMFCCModel(out_c=10)
-    sample_input = torch.randn(1, 32, 24)
+    model = SimpleMFCCModel(out_c=10)
+    sample_input = torch.randn(1, 30, 24)
     output = model(sample_input)
     print(output[0].shape)
     print("Learnable parameters:", sum(p.numel() for p in model.parameters() if p.requires_grad))

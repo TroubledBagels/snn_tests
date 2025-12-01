@@ -1,0 +1,65 @@
+import  torch
+import torch.nn as nn
+
+from models import ConventionalBSquare as CBS
+import torchvision
+import torchvision.transforms as transforms
+import pathlib
+import tqdm
+import random
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+if __name__ == '__main__':
+    home_dir = pathlib.Path.home()
+    save_dir = home_dir / "data" / "cifar10"
+    te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=transforms.ToTensor(), download=True)
+    tr_ds = torchvision.datasets.CIFAR10(root=save_dir, train=True, transform=transforms.ToTensor(), download=True)
+    print(f"Train size: {len(tr_ds)}, Test size: {len(te_ds)}")
+    print(tr_ds[0][0].shape)
+
+    model = CBS.BSquareModel(
+        num_classes=10,
+        input_size=3,
+        hidden_size=16,
+        num_layers=3,
+        binary_voting=False,
+        bclass=CBS.TinyCNN,
+        net_out=True
+    )
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+    print(model)
+
+    loss_fn = nn.CrossEntropyLoss()
+    # model.train_classifiers(tr_ds, te_ds, device=device, epochs=15)
+    saved_weights = torch.load("./bsquares/cifar10_bal.pth", map_location=device)
+    no_net_model = CBS.BSquareModel(
+        num_classes=10,
+        input_size=3,
+        hidden_size=16,
+        num_layers=3,
+        binary_voting=False,
+        bclass=CBS.TinyCNN,
+        net_out=False
+    )
+    no_net_model.to(device)
+    no_net_model.load_state_dict(saved_weights)
+    model.load_from_no_net(no_net_model)
+    model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3)
+
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(te_ds, batch_size=100, shuffle=False)):
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
+    torch.save(model.state_dict(), "./bsquares/cifar10_net_bal.pth")

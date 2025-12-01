@@ -114,7 +114,8 @@ def get_new_label(old_label: str, type: str) -> str:
     return old_label
 
 class MFCCDataset(Dataset):
-    def __init__(self, source=f"{str(Path.home())}/data/daps-phonemes/", type='all'):
+    def __init__(self, source=f"/data/daps-phonemes/", type='all'):
+        source = os.path.join(str(Path.home()), source.lstrip('/'))
         self.type = type
         self.source_path = source
         self.data = []
@@ -158,6 +159,9 @@ class MFCCDataset(Dataset):
                     continue
                 self.labels.append(torch.Tensor([self.sorted_unique.index(new_label)]))
             self.data.append(torch.from_numpy(data).float())
+            if i+1 % 1000 == 0:
+                print(f"\rLoaded {i+1}/{len(data_files)} samples", end="")
+        print("")
 
 
     def __len__(self):
@@ -198,7 +202,7 @@ def get_one_of_each():
             break
     return dataset[selected_indices]
 
-def get_by_labels(dataset: MFCCDataset, target_labels: list[int], incl_else: bool = False):
+def get_by_labels(dataset: MFCCDataset, target_labels: list[int], incl_else: bool = False, with_balance=0):
     new_ds = []
     for i in range(len(dataset)):
         data, label = dataset[i]
@@ -208,21 +212,54 @@ def get_by_labels(dataset: MFCCDataset, target_labels: list[int], incl_else: boo
             new_ds.append((data, 1))
         elif incl_else:
             new_ds.append((data, 2))
+
+    if with_balance:
+        # 1 is oversampling, 2 is undersampling
+        counts = [0, 0]
+        for _, label in new_ds:
+            if label in [0, 1]:
+                counts[label] += 1
+        if with_balance == 1:
+            max_count = max(counts)
+            balanced_ds = []
+            for label_id in [0, 1]:
+                items = [item for item in new_ds if item[1] == label_id]
+                multiplier = max_count // counts[label_id]
+                remainder = max_count % counts[label_id]
+                balanced_ds.extend(items * multiplier)
+                balanced_ds.extend(items[:remainder])
+            new_ds = balanced_ds
+        elif with_balance == 2:
+            min_count = min(counts)
+            balanced_ds = []
+            for label_id in [0, 1]:
+                items = [item for item in new_ds if item[1] == label_id]
+                balanced_ds.extend(items[:min_count])
+            new_ds = balanced_ds
     return new_ds
 
 if __name__ == "__main__":
     dataset = MFCCDataset(type="all")
-    dl = DataLoader(dataset, batch_size=1, shuffle=True)
-    print(next(iter(dl))[0].shape)
-    dist = dataset.get_dist()
-    print(dist)
-    print(dataset[0][0].shape)
-    # Plot bar chart distribution of classes
-    plt.figure(figsize=(12, 8))
-    # make bar chart with class labels at 90 degree angle, dist is a list of tuples (label, count)
-    plt.bar([x[0] for x in dist], [x[1] for x in dist])
-    plt.xticks(rotation=90)
-    plt.xlabel('Class Label')
-    plt.ylabel('Number of Samples')
-    plt.title('Class Distribution in Phoneme Dataset')
+    print(dataset.sorted_unique)
+    length_dict = {}
+    for i in range(len(dataset)):
+        data, label = dataset[i]
+        if label.item() not in length_dict:
+            length_dict[label.item()] = []
+        length_dict[label.item()].append(data.shape[1])
+    mean_lengths = np.array([np.mean(length_dict[key]) for key in sorted(length_dict, key=lambda x: x)])
+    overall_mean = np.mean(mean_lengths)
+    median_lengths = np.array([np.median(length_dict[key]) for key in sorted(length_dict, key=lambda x: x)])
+    max_lengths = np.array([np.max(length_dict[key]) for key in sorted(length_dict, key=lambda x: x)])
+    min_lengths = np.array([np.min(length_dict[key]) for key in sorted(length_dict, key=lambda x: x)])
+    q1_lengths = np.array([np.percentile(length_dict[key], 25) for key in sorted(length_dict, key=lambda x: x)])
+    q3_lengths = np.array([np.percentile(length_dict[key], 75) for key in sorted(length_dict, key=lambda x: x)])
+    print(f"Overall Mean Length: {overall_mean:.2f}")
+    print(f"Mean of Mean Lengths: {np.mean(mean_lengths):.2f}, Std: {np.std(mean_lengths):.2f}")
+    # Create 1 big box plot with all these stats. Box plot per phoneme class stretching horizontally in a portrait image
+    plt.figure(figsize=(8, 12))
+    plt.boxplot([length_dict[key] for key in sorted(length_dict, key=lambda x: x)], vert=False, patch_artist=False, showfliers=False)
+    plt.yticks(ticks=np.arange(1, len(dataset.sorted_unique)+1), labels=dataset.sorted_unique)
+    plt.xlabel('Length (Number of Frames)')
+    plt.title('Distribution of MFCC Frame Lengths per Phoneme Class')
     plt.show()
