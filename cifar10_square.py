@@ -65,7 +65,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(te_ds, batch_size=100, shuffle=False)):
             images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
+            outputs, _ = model(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
