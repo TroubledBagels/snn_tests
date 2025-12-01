@@ -253,6 +253,7 @@ class BSquareModel(nn.Module):
                         target_binary = (target == classifier.c_2).long()
                         te_loss += criterion(output, target_binary).item()
                         output, _ = classifier(data)
+                        te_loss += criterion(output, target_binary).item()
                         preds = output.argmax(dim=1)
                         correct += (preds == target_binary).sum().item()
                         total += target_binary.size(0)
