@@ -176,8 +176,12 @@ class BSquareModel(nn.Module):
                             votes[b, c_2] += 1
                 else:
                     # add individual spikes
-                    votes[:, c_1] += out[:, 0]
-                    votes[:, c_2] += out[:, 1]
+                    for b in range(B):
+                        if abs(votes[b, c_1] - votes[b, c_2]) > 0.1:
+                            votes[b, c_1] += out[b, 0]
+                            votes[b, c_2] += out[b, 1]
+                    # votes[:, c_1] += out[:, 0]
+                    # votes[:, c_2] += out[:, 1]
         return votes
 
     def train_classifiers(self, train_ds, test_ds, epochs=3, lr=1e-3, device='cpu'):

@@ -72,16 +72,16 @@ if __name__ == '__main__':
     torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
 
     num_to_str_label = {
-        0: "airplane",
-        1: "automobile",
-        2: "bird",
-        3: "cat",
-        4: "deer",
-        5: "dog",
-        6: "frog",
-        7: "horse",
-        8: "ship",
-        9: "truck"
+        0: "0",
+        1: "1",
+        2: "2",
+        3: "3",
+        4: "4",
+        5: "5",
+        6: "6",
+        7: "7",
+        8: "8",
+        9: "9"
     }
 
     heatmap_img, classes = hm.generate_heatmap(accuracy_dict, num_to_str_label, use_acc=True)
