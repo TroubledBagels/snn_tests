@@ -135,7 +135,11 @@ class BSquareModel(nn.Module):
             for j in range(i+1, num_classes):
                 self.classifiers.append(bclass(i, j, input_size, hidden_size, 2, num_layers))
         if net_out:
-            self.out_layer = nn.Linear(len(self.classifiers) * 2, num_classes)
+            self.out_layer = nn.Sequential(
+                nn.Linear(len(self.classifiers) * 2, 64),
+                nn.Linear(64, num_classes)
+            )
+            print("Initialized ANN output layer for BSquareModel.")
 
     def forward(self, x) -> torch.Tensor:
         B = x.size(0)
