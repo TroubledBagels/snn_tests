@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import utils.heatmap as hm
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    model.train_classifiers(tr_ds, te_ds, device=device, epochs=20)
+    accuracy_dict = model.train_classifiers(tr_ds, te_ds, device=device, epochs=20)
     # saved_weights = torch.load(model_dir, map_location=device)
     # no_net_model = CBS.BSquareModel(
     #     num_classes=10,
@@ -69,3 +70,19 @@ if __name__ == '__main__':
             correct += (predicted == labels).sum().item()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
     torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
+
+    num_to_str_label = {
+        0: "airplane",
+        1: "automobile",
+        2: "bird",
+        3: "cat",
+        4: "deer",
+        5: "dog",
+        6: "frog",
+        7: "horse",
+        8: "ship",
+        9: "truck"
+    }
+
+    heatmap_img, classes = hm.generate_heatmap(accuracy_dict, num_to_str_label, use_acc=True)
+    cv2.imwrite("heatmap.png", heatmap_img)

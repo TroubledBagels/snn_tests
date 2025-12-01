@@ -206,6 +206,7 @@ class BSquareModel(nn.Module):
         print("")
 
         print("Training...")
+        acc_dict = {}
         for idx, classifier in enumerate(self.classifiers):
             cl_tr_ds = tr_ds_dict[classifier.c_1] + tr_ds_dict[classifier.c_2]
             shuffle(cl_tr_ds)
@@ -255,6 +256,12 @@ class BSquareModel(nn.Module):
                     cur_best_acc = accuracy
             print(f"Best accuracy for Classifier {classifier.c_1} vs {classifier.c_2}: {cur_best_acc:.2f}%")
             classifier.load_state_dict(cur_best)
+            acc_dict[(classifier.c_1, classifier.c_2)] = cur_best_acc
+        print("Finished training all classifiers.")
+        print("Classifier accuracies:")
+        for key in acc_dict:
+            print(f" Classes {key[0]} vs {key[1]}: {acc_dict[key]:.2f}%")
+        return acc_dict
 
     def get_model_by_classes(self, c_1, c_2):
         for classifier in self.classifiers:
