@@ -22,7 +22,7 @@ class BClassModel(nn.Module):
         self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         self.bn4 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
-        self.fc1 = nn.Linear(64 * 8 * 8, 512)
+        self.fc1 = nn.Linear(64 * 4 * 4, 512)
         self.fc2 = nn.Linear(512, 10)
 
     def forward(self, x):
