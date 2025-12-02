@@ -105,9 +105,8 @@ class TinyCNN(nn.Module):
         # self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         # self.bn4 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
-        self.fc1 = nn.Linear(64 * 4 * 4, 512)
-        self.fc2 = nn.Linear(512, 256)
-        self.fc3 = nn.Linear(256, 2)
+        self.fc1 = nn.Linear(64 * 4 * 4, 2)
+        # self.fc2 = nn.Linear(64, 2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -127,10 +126,10 @@ class TinyCNN(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        x = torch.relu(x)
-        x = self.fc2(x)
-        x = torch.relu(x)
-        x = self.fc3(x)
+        # x = torch.relu(x)
+        # x = self.fc2(x)
+        # x = torch.relu(x)
+        # x = self.fc3(x)
         return x, None
 
     def get_hidden_weights(self):
@@ -488,19 +487,6 @@ class BSquareModelCombined(nn.Module):
             print(f"ANN Output Layer Test Accuracy: {accuracy:.2f}%")
 
 if __name__ == "__main__":
-    model = BSquareModel(num_classes=4, input_size=34*34*2, hidden_size=16, num_layers=2, binary_voting=False)
-    comb_model = BSquareModelCombined(num_classes=4, input_size=34*34*2, hidden_size=16, num_layers=2, binary_voting=False, net_output=False)
+    model = TinyCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     print(model)
-    print(comb_model)
-    comb_model.load_ensemble(model)
-    fc2 = getattr(model.classifiers[2], 'fc2')
-    comb_fc2 = getattr(comb_model, 'fc2')
-    print(comb_fc2.weight.data[32:48, 32:48].shape)
-    print(fc2.weight.data.shape)
-    print((comb_fc2.weight.data[32:48, 32:48] == fc2.weight.data).sum())
-    print(comb_model)
-    x = torch.randn(1, 2, 34, 34)  # Example input
-    votes = comb_model(x)
-    votes_m = model(x)
-    print(votes == votes_m)
-    print("Votes:", votes, votes_m)
