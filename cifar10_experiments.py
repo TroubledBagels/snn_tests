@@ -23,7 +23,7 @@ class BClassModel(nn.Module):
         self.bn4 = nn.BatchNorm2d(64)
         # self.gap = nn.AdaptiveAvgPool2d(4)
         self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 4 * 4, 512)
+        self.fc1 = nn.Linear(64 * 8 * 8, 512)
         self.fc2 = nn.Linear(512, 10)
 
     def forward(self, x):
