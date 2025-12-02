@@ -97,7 +97,7 @@ if __name__ == "__main__":
     model.train()
     cur_best = None
     cur_best_acc = 0.0
-    for epoch in range(30):
+    for epoch in range(50):
         model.train()
         running_loss = 0.0
         for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(tr_subset, batch_size=100, shuffle=True)):
