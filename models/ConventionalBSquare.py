@@ -155,7 +155,7 @@ class SmallCNN(nn.Module):
         self.gap = nn.AdaptiveAvgPool2d(4)
         # self.gap = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(64 * 4 * 4, 256)
-        self.fc2 = nn.Linear(256, 10)
+        self.fc2 = nn.Linear(256, 2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -535,6 +535,6 @@ class BSquareModelCombined(nn.Module):
             print(f"ANN Output Layer Test Accuracy: {accuracy:.2f}%")
 
 if __name__ == "__main__":
-    model = TinyCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
+    model = SmallCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     print(model)

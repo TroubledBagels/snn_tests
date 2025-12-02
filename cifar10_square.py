@@ -86,7 +86,7 @@ if __name__ == '__main__':
                     fns[true_label] = fns.get(true_label, 0) + 1
     print()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
-    torch.save(model.state_dict(), "./bsquares/cifar10_bal_128.pth")
+    torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_256.pth")
     print(f"F1 Scores:")
     for cls in range(10):
         tp = tps.get(cls, 0)
