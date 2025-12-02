@@ -105,8 +105,8 @@ class TinyCNN(nn.Module):
         # self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         # self.bn4 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
-        self.fc1 = nn.Linear(64 * 4 * 4, 128)
-        self.fc2 = nn.Linear(128, 2)
+        # self.fc1 = nn.Linear(64 * 4 * 4, 2)
+        # self.fc2 = nn.Linear(128, 2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -180,19 +180,20 @@ class BSquareModel(nn.Module):
                             vote_dict[(c_1, c_2)] = (1 if preds[b] == 0 else 0.01, 1 if preds[b] == 1 else 0.01)
                 else:
                     # add individual spikes
-                    for b in range(B):
-                        b_ratio = abs(out[b, 0].item() - out[b, 1].item())
-                        # print(b_ratio)
-                        if abs(out[b, 0].item() - out[b, 1].item()) > 0.0:
-                            votes[b, c_1] += out[b, 0] * b_ratio
-                            votes[b, c_2] += out[b, 1] * b_ratio
-                            if B == 1:
-                                vote_dict[(c_1, c_2)] = (out[b, 0].item(), out[b, 1].item())
-                        else:
-                            # print("Rejected vote due to low confidence.")
-                            pass
-                    # votes[:, c_1] += out[:, 0]
-                    # votes[:, c_2] += out[:, 1]
+                    # for b in range(B):
+                    #     b_ratio = abs(out[b, 0].item() - out[b, 1].item())
+                    #     # print(b_ratio)
+                    #     if abs(out[b, 0].item() - out[b, 1].item()) > 0.0:
+                    #         votes[b, c_1] += out[b, 0] * b_ratio
+                    #         votes[b, c_2] += out[b, 1] * b_ratio
+                    #         if B == 1:
+                    #             vote_dict[(c_1, c_2)] = (out[b, 0].item(), out[b, 1].item())
+                    #     else:
+                    #         # print("Rejected vote due to low confidence.")
+                    #         pass
+                    votes[:, c_1] += out[:, 0]
+                    votes[:, c_2] += out[:, 1]
+                    vote_dict[(c_1, c_2)] = (out[0, 0].item(), out[0, 1].item())
         return votes, vote_dict
 
     def train_classifiers(self, train_ds, test_ds, epochs=3, lr=1e-3, device='cpu'):
