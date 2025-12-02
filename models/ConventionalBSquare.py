@@ -126,8 +126,8 @@ class TinyCNN(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        # x = torch.relu(x)
-        # x = self.fc2(x)
+        x = torch.relu(x)
+        x = self.fc2(x)
         return x, None
 
     def get_hidden_weights(self):
