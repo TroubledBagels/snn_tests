@@ -154,8 +154,8 @@ class SmallCNN(nn.Module):
         self.bn4 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
         # self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 4 * 4, 256)
-        self.fc2 = nn.Linear(256, 2)
+        self.fc1 = nn.Linear(64 * 4 * 4, 2)
+        # self.fc2 = nn.Linear(256, 2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -176,8 +176,8 @@ class SmallCNN(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        x = torch.relu(x)
-        x = self.fc2(x)
+        # x = torch.relu(x)
+        # x = self.fc2(x)
         return x, None
 
     def get_hidden_weights(self):
