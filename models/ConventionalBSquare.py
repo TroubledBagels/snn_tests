@@ -147,8 +147,8 @@ class BSquareModel(nn.Module):
                 self.classifiers.append(bclass(i, j, input_size, hidden_size, 2, num_layers))
         if net_out:
             self.out_layer = nn.Sequential(
-                nn.Linear(len(self.classifiers) * 2, 64),
-                nn.Linear(64, num_classes)
+                nn.Linear(len(self.classifiers) * 2, num_classes),
+                # nn.Linear(64, num_classes)
             )
             print("Initialized ANN output layer for BSquareModel.")
 
