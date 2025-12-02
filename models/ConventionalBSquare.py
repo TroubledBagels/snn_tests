@@ -106,8 +106,8 @@ class TinyCNN(nn.Module):
         # self.bn4 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
         self.fc1 = nn.Linear(64 * 4 * 4, 512)
-        self.fc2 = nn.Linear(512, 128)
-        self.fc3 = nn.Linear(128, 2)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 2)
 
     def forward(self, x):
         x = self.conv1(x)
