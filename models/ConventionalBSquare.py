@@ -183,7 +183,7 @@ class BSquareModel(nn.Module):
                     for b in range(B):
                         b_ratio = abs(out[b, 0].item() - out[b, 1].item())
                         # print(b_ratio)
-                        if abs(out[b, 0].item() - out[b, 1].item()) > 0.99:
+                        if abs(out[b, 0].item() - out[b, 1].item()) > 0.4:
                             votes[b, c_1] += out[b, 0] * b_ratio
                             votes[b, c_2] += out[b, 1] * b_ratio
                             if B == 1:
