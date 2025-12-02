@@ -62,6 +62,9 @@ if __name__ == '__main__':
     model.eval()
     correct = 0
     total = 0
+    tps = {}
+    fps = {}
+    fns = {}
     with torch.no_grad():
         for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(te_ds, batch_size=100, shuffle=False)):
             images, labels = images.to(device), labels.to(device)
@@ -69,8 +72,26 @@ if __name__ == '__main__':
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            for i in range(len(labels)):
+                true_label = labels[i].item()
+                pred_label = predicted[i].item()
+                if true_label == pred_label:
+                    tps[true_label] = tps.get(true_label, 0) + 1
+                else:
+                    fps[pred_label] = fps.get(pred_label, 0) + 1
+                    fns[true_label] = fns.get(true_label, 0) + 1
+    print()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
     torch.save(model.state_dict(), "./bsquares/cifar10_bal.pth")
+    print(f"F1 Scores:")
+    for cls in range(10):
+        tp = tps.get(cls, 0)
+        fp = fps.get(cls, 0)
+        fn = fns.get(cls, 0)
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+        print(f" Class {cls}: F1={f1:.3f}, Precision={precision:.3f}, Recall={recall:.3f}")
 
     random_idx = random.randint(0, len(te_ds)-1)
     print(f"Random test sample index: {random_idx}")
