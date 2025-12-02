@@ -15,6 +15,9 @@ import pandas as pd
 import utils.heatmap as hm
 
 if __name__ == '__main__':
+    torch.manual_seed(42)
+    random.seed(42)
+
     if len(sys.argv) > 1:
         model_dir = sys.argv[1]
     else:
