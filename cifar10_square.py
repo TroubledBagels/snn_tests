@@ -36,7 +36,7 @@ if __name__ == '__main__':
         hidden_size=16,
         num_layers=3,
         binary_voting=False,
-        bclass=CBS.TinyCNN,
+        bclass=CBS.SmallCNN,
         net_out=False
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
