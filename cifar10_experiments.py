@@ -57,6 +57,7 @@ def get_classes(ds, c_1, c_2):
     return torch.utils.data.TensorDataset(torch.stack([s[0] for s in samples]), torch.tensor([s[1] for s in samples]))
 
 if __name__ == "__main__":
+    torch.manual_seed(42)
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
 
