@@ -21,9 +21,9 @@ class BClassModel(nn.Module):
         self.bn3 = nn.BatchNorm2d(128)
         self.conv4 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
         self.bn4 = nn.BatchNorm2d(256)
-        # self.gap = nn.AdaptiveAvgPool2d(4)
-        self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(256 * 8 * 8, 512)
+        self.gap = nn.AdaptiveAvgPool2d(4)
+        # self.gap = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(256 * 4 * 4, 512)
         self.fc2 = nn.Linear(512, 10)
 
     def forward(self, x):
