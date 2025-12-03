@@ -266,8 +266,7 @@ class MediumCNN(nn.Module):
         self.bn6 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
         # self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 4 * 4, 256)
-        self.fc2 = nn.Linear(256, 2)
+        self.fc1 = nn.Linear(64 * 4 * 4, 2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -296,8 +295,6 @@ class MediumCNN(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        x = torch.relu(x)
-        x = self.fc2(x)
         return x, None
 
 class SeparableMediumCNN(nn.Module):
@@ -357,8 +354,7 @@ class SeparableMediumCNN(nn.Module):
         )
         self.gap = nn.AdaptiveAvgPool2d(4)
         # self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 4 * 4, 256)
-        self.fc2 = nn.Linear(256, 2)
+        self.fc1 = nn.Linear(64 * 4 * 4, 2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -377,8 +373,6 @@ class SeparableMediumCNN(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        x = torch.relu(x)
-        x = self.fc2(x)
         return x, None
 
 class BSquareModel(nn.Module):
@@ -734,9 +728,14 @@ if __name__ == "__main__":
     model = SeparableSmallCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
     reg_model = SmallCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
     tiny_model = TinyCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
-    print(f"[SEPARABLE] Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+    med_model = MediumCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
+    sep_med_model = SeparableMediumCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
+    print(f"[SEP SMALL] Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     print(f"[REGULAR] Number of parameters: {sum(p.numel() for p in reg_model.parameters() if p.requires_grad)}")
     print(f"[TINY] Number of parameters: {sum(p.numel() for p in tiny_model.parameters() if p.requires_grad)}")
+    print(f"[MEDIUM] Number of parameters: {sum(p.numel() for p in med_model.parameters() if p.requires_grad)}")
+    print(f"[SEP MEDIUM] Number of parameters: {sum(p.numel() for p in sep_med_model.parameters() if p.requires_grad)}")
+
     print(model)
     dummy_input = torch.randn(1, 3, 64, 64)
     start_time_separable = time.time()
@@ -751,6 +750,16 @@ if __name__ == "__main__":
     tiny_output, _ = tiny_model(dummy_input)
     end_time_tiny = time.time()
 
+    start_time_medium = time.time()
+    med_output, _ = med_model(dummy_input)
+    end_time_medium = time.time()
+
+    start_time_sep_medium = time.time()
+    sep_med_output, _ = sep_med_model(dummy_input)
+    end_time_sep_medium = time.time()
+
     print(f"Separable CNN output shape: {output.shape}, Time taken: {end_time_separable - start_time_separable:.6f} seconds")
     print(f"Regular CNN output shape: {reg_output.shape}, Time taken: {end_time_regular - start_time_regular:.6f} seconds")
     print(f"Tiny CNN output shape: {tiny_output.shape}, Time taken: {end_time_tiny - start_time_tiny:.6f} seconds")
+    print(f"Medium CNN output shape: {med_output.shape}, Time taken: {end_time_medium - start_time_medium:.6f} seconds")
+    print(f"Separable Medium CNN output shape: {sep_med_output.shape}, Time taken: {end_time_sep_medium - start_time_sep_medium:.6f} seconds")
