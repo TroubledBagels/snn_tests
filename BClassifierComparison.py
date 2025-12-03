@@ -101,14 +101,14 @@ if __name__ == '__main__':
                         _, predicted = torch.max(outputs.data, 1)
                         total = labels.size(0)
                         correct += (predicted == labels).sum().item()
-                        qbar.set_description(f"Evaluating Model: {model_name} for classes {i} vs {j} Epoch {epoch} Acc: {correct/(k+1)/100.0:.2f}% Best: {cur_best:.2f}%")
+                        qbar.set_description(f"Evaluating Model: {model_name} for classes {i} vs {j} Epoch {epoch} Acc: {correct/(k+1):.2f}% Best: {cur_best * 100:.2f}%")
 
                     acc = correct / len(te_dl) / 100.0
                     if acc > cur_best:
                         cur_best = acc
 
                 df_record[model_name] = cur_best / 100.0
-            result_df = result_df.concat(df_record)
+            result_df = pd.concat([result_df, df_record])
             print(result_df)
     print(result_df)
     result_df.to_csv("bclassifier_comparison_results.csv", index=False)
