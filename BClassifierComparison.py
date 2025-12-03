@@ -107,7 +107,7 @@ if __name__ == '__main__':
                     if acc > cur_best:
                         cur_best = acc
 
-                df_record[model_name] = cur_best / 100.0
+                df_record[model_name] = cur_best
             result_df.loc[len(result_df)] = df_record
             print(result_df)
     print(result_df)
