@@ -247,6 +247,7 @@ class SeparableSmallCNN(nn.Module):
 
 class MediumCNN(nn.Module):
     def __init__(self, c_1, c_2, hid, inp, out, num_layers=2):
+        super(MediumCNN, self).__init__()
         self.c_1 = c_1
         self.c_2 = c_2
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
@@ -291,6 +292,87 @@ class MediumCNN(nn.Module):
         x = self.do(x)
         x = self.conv6(x)
         x = self.bn6(x)
+        x = torch.relu(x)
+        x = self.gap(x)
+        x = nn.Flatten()(x)
+        x = self.fc1(x)
+        x = torch.relu(x)
+        x = self.fc2(x)
+        return x, None
+
+class SeparableMediumCNN(nn.Module):
+    def __init__(self, c_1, c_2, hid, inp, out, num_layers=2):
+        super(SeparableMediumCNN, self).__init__()
+        self.c_1 = c_1
+        self.c_2 = c_2
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1, groups=3),
+            nn.BatchNorm2d(3),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(3, 32, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True)
+        )
+        self.do = nn.Dropout(0.2)
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, groups=32),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True)
+        )
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, groups=32),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 64, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True)
+        )
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, groups=64),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True)
+        )
+        self.conv5 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, groups=64),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True)
+        )
+        self.conv6 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, groups=64),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True)
+        )
+        self.gap = nn.AdaptiveAvgPool2d(4)
+        # self.gap = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(64 * 4 * 4, 256)
+        self.fc2 = nn.Linear(256, 2)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.do(x)
+        x = self.conv2(x)
+        x = self.pool(x)
+        x = self.conv3(x)
+        x = self.do(x)
+        x = self.pool(x)
+        x = self.conv4(x)
+        x = self.do(x)
+        x = self.conv5(x)
+        x = self.do(x)
+        x = self.conv6(x)
         x = torch.relu(x)
         x = self.gap(x)
         x = nn.Flatten()(x)
