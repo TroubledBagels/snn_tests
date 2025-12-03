@@ -108,6 +108,7 @@ if __name__ == '__main__':
                         cur_best = acc
 
                 df_record[model_name] = cur_best / 100.0
-            result_df = result_df.append(df_record, ignore_index=True)
+            result_df = result_df.concat(df_record)
+            print(result_df)
     print(result_df)
     result_df.to_csv("bclassifier_comparison_results.csv", index=False)
