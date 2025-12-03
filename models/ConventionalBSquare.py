@@ -597,8 +597,10 @@ class BSquareModelCombined(nn.Module):
 if __name__ == "__main__":
     model = SeparableSmallCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
     reg_model = SmallCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
+    tiny_model = TinyCNN(0, 1, hid=32, inp=3, out=2, num_layers=2)
     print(f"[SEPARABLE] Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     print(f"[REGULAR] Number of parameters: {sum(p.numel() for p in reg_model.parameters() if p.requires_grad)}")
+    print(f"[TINY] Number of parameters: {sum(p.numel() for p in tiny_model.parameters() if p.requires_grad)}")
     print(model)
     dummy_input = torch.randn(1, 3, 64, 64)
     start_time_separable = time.time()
@@ -609,5 +611,10 @@ if __name__ == "__main__":
     reg_output, _ = reg_model(dummy_input)
     end_time_regular = time.time()
 
+    start_time_tiny = time.time()
+    tiny_output, _ = tiny_model(dummy_input)
+    end_time_tiny = time.time()
+
     print(f"Separable CNN output shape: {output.shape}, Time taken: {end_time_separable - start_time_separable:.6f} seconds")
     print(f"Regular CNN output shape: {reg_output.shape}, Time taken: {end_time_regular - start_time_regular:.6f} seconds")
+    print(f"Tiny CNN output shape: {tiny_output.shape}, Time taken: {end_time_tiny - start_time_tiny:.6f} seconds")
