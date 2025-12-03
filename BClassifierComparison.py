@@ -108,6 +108,7 @@ if __name__ == '__main__':
                         cur_best = acc
 
                 df_record[model_name] = cur_best / 100.0
+            temp_series = pd.Series(df_record)
             result_df = pd.concat([result_df, df_record])
             print(result_df)
     print(result_df)
