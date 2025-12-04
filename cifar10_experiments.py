@@ -45,8 +45,8 @@ class BClassModel(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        x = torch.relu(x)
-        x = self.fc2(x)
+        # x = torch.relu(x)
+        # x = self.fc2(x)
         return x
 
 def get_classes(ds, c_1, c_2):
