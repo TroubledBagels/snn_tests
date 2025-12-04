@@ -21,14 +21,10 @@ class BClassModel(nn.Module):
         self.bn3 = nn.BatchNorm2d(64)
         self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         self.bn4 = nn.BatchNorm2d(64)
-        self.conv5 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
-        self.bn5 = nn.BatchNorm2d(64)
-        self.conv6 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
-        self.bn6 = nn.BatchNorm2d(64)
-        self.gap = nn.AdaptiveAvgPool2d(4)
+        self.gap = nn.AdaptiveAvgPool2d(1)
         # self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 4 * 4, 256)
-        self.fc2 = nn.Linear(256, 10)
+        self.fc1 = nn.Linear(64 * 1 * 1, 2)
+        # self.fc2 = nn.Linear(256, 10)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -45,14 +41,6 @@ class BClassModel(nn.Module):
         x = self.do(x)
         x = self.conv4(x)
         x = self.bn4(x)
-        x = torch.relu(x)
-        x = self.pool(x)
-        x = self.conv5(x)
-        x = self.bn5(x)
-        x = torch.relu(x)
-        x = self.do(x)
-        x = self.conv6(x)
-        x = self.bn6(x)
         x = torch.relu(x)
         x = self.gap(x)
         x = nn.Flatten()(x)
@@ -109,7 +97,7 @@ if __name__ == "__main__":
     model.train()
     cur_best = None
     cur_best_acc = 0.0
-    for epoch in range(100):
+    for epoch in range(200):
         model.train()
         running_loss = 0.0
         for images, labels in tqdm.tqdm(torch.utils.data.DataLoader(tr_subset, batch_size=100, shuffle=True)):

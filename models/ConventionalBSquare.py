@@ -399,6 +399,7 @@ class BSquareModel(nn.Module):
         if self.net_out:
             out_list = []
             for classifier in self.classifiers:
+                classifier.eval()
                 out, _ = classifier(x)
                 out_list.append(out)
             out_tensor = torch.cat(out_list, dim=1)
@@ -406,6 +407,7 @@ class BSquareModel(nn.Module):
             return ann_out
         else:
             for classifier in self.classifiers:
+                classifier.eval()
                 out, _ = classifier(x)
                 out = nn.Softmax(dim=1)(out)
                 c_1, c_2 = classifier.c_1, classifier.c_2
