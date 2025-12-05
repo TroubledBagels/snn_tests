@@ -27,6 +27,7 @@ class BClassModel(nn.Module):
         # self.fc2 = nn.Linear(256, 10)
 
     def forward(self, x):
+        res = x
         x = self.conv1(x)
         x = self.bn1(x)
         x = torch.relu(x)
@@ -34,7 +35,9 @@ class BClassModel(nn.Module):
         x = self.conv2(x)
         x = self.bn2(x)
         x = torch.relu(x)
+        x += res
         x = self.pool(x)
+        res = x
         x = self.conv3(x)
         x = self.bn3(x)
         x = torch.relu(x)
@@ -42,6 +45,7 @@ class BClassModel(nn.Module):
         x = self.conv4(x)
         x = self.bn4(x)
         x = torch.relu(x)
+        x += res
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
