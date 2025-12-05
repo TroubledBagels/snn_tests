@@ -27,8 +27,8 @@ class BClassModel(nn.Module):
         # self.fc2 = nn.Linear(256, 10)
 
     def forward(self, x):
-        res = x
         x = self.conv1(x)
+        res = x
         x = self.bn1(x)
         x = torch.relu(x)
         x = self.do(x)
