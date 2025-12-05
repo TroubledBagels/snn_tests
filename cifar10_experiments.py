@@ -37,8 +37,8 @@ class BClassModel(nn.Module):
         x = torch.relu(x)
         x += res
         x = self.pool(x)
-        res = x
         x = self.conv3(x)
+        res = x
         x = self.bn3(x)
         x = torch.relu(x)
         x = self.do(x)
