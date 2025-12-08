@@ -524,8 +524,17 @@ class BSquareModel(nn.Module):
                     for data, target in pbar:
                         data = data.float()
                         data, target = data.to(device), target.to(device)
-                        target_binary = (target == classifier.c_2).long()
+                        target_binary = torch.zeros(len(target), 2, device=device)
+                        mask_c1 = (target == classifier.c_1)
+                        target_binary[mask_c1] = torch.tensor([1.0, 0.0], device=device)
+                        mask_c2 = (target == classifier.c_2)
+                        target_binary[mask_c2] = torch.tensor([0.0, 1.0], device=device)
+                        mask_other = ~(mask_c1 | mask_c2)
+                        target_binary[mask_other] = torch.tensor([0.5, 0.5], device=device)
+
                         output, _ = classifier(data)
+                        if training_type != 'normal':
+                            output = nn.Softmax(dim=1)(output)
                         te_loss += criterion(output, target_binary).item()
                         preds = output.argmax(dim=1)
                         correct += (preds == target_binary).sum().item()
