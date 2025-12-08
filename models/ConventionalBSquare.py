@@ -427,7 +427,8 @@ class BSquareModel(nn.Module):
                     vote_dict[(c_1, c_2)] = (out[0, 0].item(), out[0, 1].item())
         return votes, vote_dict
 
-    def train_classifiers(self, train_ds, test_ds, epochs=3, lr=1e-3, device='cpu'):
+    def train_classifiers(self, train_ds, test_ds, epochs=3, lr=1e-3, device='cpu', training_type='normal'):
+        # training_type: 'normal', 'all_class', or 'noise'
         print("Training classifiers...")
         criterion = nn.CrossEntropyLoss()
         print("Initialising optimisers...")

@@ -35,7 +35,7 @@ if __name__ == '__main__':
         input_size=3,
         hidden_size=16,
         num_layers=3,
-        binary_voting=True,
+        binary_voting=False,
         bclass=CBS.SmallCNN,
         net_out=False
     )
