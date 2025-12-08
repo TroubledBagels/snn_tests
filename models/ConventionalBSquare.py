@@ -431,6 +431,9 @@ class BSquareModel(nn.Module):
         # training_type: 'normal', 'all_class', or 'noise'
         print("Training classifiers...")
         criterion = nn.CrossEntropyLoss()
+        if training_type != 'all_class':
+            print(f"Training type: {training_type}")
+            criterion = nn.KLDivLoss(reduction='batchmean')
         print("Initialising optimisers...")
         optimizers = [torch.optim.Adam(classifier.parameters(), lr=lr) for classifier in self.classifiers]
         tr_ds_dict = {}
@@ -462,12 +465,18 @@ class BSquareModel(nn.Module):
                 noise_label = -1  # Label for noise
                 extras.append((noise_sample, noise_label))
             print(f"Generated {num_noise_samples} noise samples for training.")
+        elif training_type == 'all_class':
+            # Use all classes for training each classifier, with other classes as neutral (0.5, 0.5)
+            # Use 1/8 of each other class to avoid imbalance
+            for i in range(self.num_classes):
+                if i != self.classifiers[0].c_1 and i != self.classifiers[0].c_2:
+                    extras.extend((tr_ds_dict[i][:len(tr_ds_dict[i])//8][0], -1))
 
         print("Training...")
         acc_dict = {}
         test_loss_dict = {}
         for idx, classifier in enumerate(self.classifiers):
-            cl_tr_ds = tr_ds_dict[classifier.c_1] + tr_ds_dict[classifier.c_2]
+            cl_tr_ds = tr_ds_dict[classifier.c_1] + tr_ds_dict[classifier.c_2] + extras
 
             shuffle(cl_tr_ds)
             cl_tr_dataset = ListDataset(cl_tr_ds, transform=None)
@@ -488,9 +497,18 @@ class BSquareModel(nn.Module):
                     data = data.float()
                     data, target = data.to(device), target.to(device)
                     # For each data point in the batch, if target is c_1 output should be [1, 0], if c_2 output should be [0, 1], if other classes it should be [0.5, 0.5]
-                    target_binary = (target == classifier.c_2).long()
+                    target_binary = torch.zeros(len(target), 2, device=device)
+                    mask_c1 = (target == classifier.c_1)
+                    target_binary[mask_c1] = torch.tensor([1.0, 0.0], device=device)
+                    mask_c2 = (target == classifier.c_2)
+                    target_binary[mask_c2] = torch.tensor([0.0, 1.0], device=device)
+                    mask_other = ~(mask_c1 | mask_c2)
+                    target_binary[mask_other] = torch.tensor([0.5, 0.5], device=device)
+
                     optimizers[idx].zero_grad()
                     output, _ = classifier(data)
+                    if training_type != 'normal':
+                        output = nn.Softmax(dim=1)(output)
                     loss = criterion(output, target_binary)
                     loss.backward()
                     mean_loss += loss.item()
