@@ -532,12 +532,14 @@ class BSquareModel(nn.Module):
                         mask_other = ~(mask_c1 | mask_c2)
                         target_binary[mask_other] = torch.tensor([0.5, 0.5], device=device)
 
+                        og_target_binary = (target == classifier.c_2).long()
+
                         output, _ = classifier(data)
                         if training_type != 'normal':
                             output = nn.Softmax(dim=1)(output)
                         te_loss += criterion(output, target_binary).item()
                         preds = output.argmax(dim=1)
-                        correct += (preds == target_binary).sum().item()
+                        correct += (preds == og_target_binary).sum().item()
                         total += target_binary.size(0)
                         pbar.set_description(f"Evaluating Classifier {classifier.c_1} vs {classifier.c_2}")
                 accuracy = 100 * correct / total
