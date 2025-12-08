@@ -453,16 +453,21 @@ class BSquareModel(nn.Module):
                 print(f"\rProcessed {i+1}/{len(test_ds)} test samples", end="")
         print("")
 
+        extras = []
+        if training_type == 'noise':
+            # Generate noise samples equivalent to 1/3 of the training data (i.e. 1 class worth)
+            num_noise_samples = len(tr_ds_dict[0]) # assuming balanced classes
+            for _ in range(num_noise_samples):
+                noise_sample = torch.randn_like(train_ds[0][0])
+                noise_label = -1  # Label for noise
+                extras.append((noise_sample, noise_label))
+            print(f"Generated {num_noise_samples} noise samples for training.")
+
         print("Training...")
         acc_dict = {}
         test_loss_dict = {}
         for idx, classifier in enumerate(self.classifiers):
             cl_tr_ds = tr_ds_dict[classifier.c_1] + tr_ds_dict[classifier.c_2]
-            cl_tr_extra = []
-            for i in range(self.num_classes):
-                if i != classifier.c_1 and i != classifier.c_2:
-                    cl_tr_extra += tr_ds_dict[i][:len(cl_tr_ds)//(self.num_classes - 2)]
-            cl_tr_ds += cl_tr_extra
 
             shuffle(cl_tr_ds)
             cl_tr_dataset = ListDataset(cl_tr_ds, transform=None)
