@@ -52,6 +52,7 @@ if __name__ == '__main__':
 
     loss_fn = nn.CrossEntropyLoss()
     model.load_state_dict(torch.load(model_dir, map_location=device))
+    model.threshold = threshold
     # accuracy_dict = model.train_classifiers(
     #     train_ds=tr_ds,
     #     test_ds=te_ds,
