@@ -28,24 +28,20 @@ class BClassModel(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        res = x
         x = self.bn1(x)
         x = torch.relu(x)
         x = self.do(x)
         x = self.conv2(x)
         x = self.bn2(x)
         x = torch.relu(x)
-        x += res
         x = self.pool(x)
         x = self.conv3(x)
-        res = x
         x = self.bn3(x)
         x = torch.relu(x)
         x = self.do(x)
         x = self.conv4(x)
         x = self.bn4(x)
         x = torch.relu(x)
-        x += res
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)

@@ -36,7 +36,7 @@ if __name__ == '__main__':
         hidden_size=16,
         num_layers=3,
         binary_voting=False,
-        bclass=CBS.MediumCNN,
+        bclass=CBS.SmallCNN,
         net_out=False
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     loss_fn = nn.CrossEntropyLoss()
     # model.load_state_dict(torch.load(model_dir, map_location=device))
-    accuracy_dict = model.train_classifiers(tr_ds, te_ds, device=device, epochs=50)
+    accuracy_dict = model.train_classifiers(tr_ds, te_ds, device=device, epochs=100)
 
     # saved_weights = torch.load(model_dir, map_location=device)
     # no_net_model = CBS.BSquareModel(

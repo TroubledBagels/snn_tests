@@ -98,39 +98,25 @@ class TinyCNN(nn.Module):
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm2d(32)
         self.do = nn.Dropout(0.2)
-        # self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
-        # self.bn2 = nn.BatchNorm2d(32)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.bn3 = nn.BatchNorm2d(64)
-        # self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
-        # self.bn4 = nn.BatchNorm2d(64)
         self.gap = nn.AdaptiveAvgPool2d(4)
         self.fc1 = nn.Linear(64 * 4 * 4, 2)
-        # self.fc2 = nn.Linear(64, 2)
 
     def forward(self, x):
         x = self.conv1(x)
         x = torch.relu(x)
         x = self.bn1(x)
         x = self.do(x)
-        # x = self.conv2(x)
-        # x = torch.relu(x)
-        # x = self.bn2(x)
         x = self.pool(x)
         x = self.conv3(x)
         x = torch.relu(x)
         x = self.bn3(x)
         x = self.do(x)
-        # x = self.conv4(x)
-        # x = torch.relu(x)
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        # x = torch.relu(x)
-        # x = self.fc2(x)
-        # x = torch.relu(x)
-        # x = self.fc3(x)
         return x, None
 
     def get_hidden_weights(self):
@@ -468,6 +454,12 @@ class BSquareModel(nn.Module):
         test_loss_dict = {}
         for idx, classifier in enumerate(self.classifiers):
             cl_tr_ds = tr_ds_dict[classifier.c_1] + tr_ds_dict[classifier.c_2]
+            cl_tr_extra = []
+            for i in range(self.num_classes):
+                if i != classifier.c_1 and i != classifier.c_2:
+                    cl_tr_extra += tr_ds_dict[i][:len(cl_tr_ds)//(self.num_classes - 2)]
+            cl_tr_ds += cl_tr_extra
+
             shuffle(cl_tr_ds)
             cl_tr_dataset = ListDataset(cl_tr_ds, transform=None)
             train_dl = DataLoader(cl_tr_dataset, batch_size=64, shuffle=True)
@@ -486,6 +478,7 @@ class BSquareModel(nn.Module):
                 for i, (data, target) in enumerate(pbar):
                     data = data.float()
                     data, target = data.to(device), target.to(device)
+                    # For each data point in the batch, if target is c_1 output should be [1, 0], if c_2 output should be [0, 1], if other classes it should be [0.5, 0.5]
                     target_binary = (target == classifier.c_2).long()
                     optimizers[idx].zero_grad()
                     output, _ = classifier(data)
