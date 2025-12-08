@@ -43,7 +43,7 @@ if __name__ == '__main__':
         binary_voting=False,
         bclass=CBS.SmallCNN,
         net_out=False,
-        threshold=0.4
+        threshold=threshold
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
