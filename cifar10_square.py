@@ -51,15 +51,15 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    model.load_state_dict(torch.load(model_dir, map_location=device))
-    model.threshold = threshold
-    # accuracy_dict = model.train_classifiers(
-    #     train_ds=tr_ds,
-    #     test_ds=te_ds,
-    #     device=device,
-    #     epochs=100,
-    #     training_type='all_class'
-    # )
+    # model.load_state_dict(torch.load(model_dir, map_location=device))
+    # model.threshold = threshold
+    accuracy_dict = model.train_classifiers(
+        train_ds=tr_ds,
+        test_ds=te_ds,
+        device=device,
+        epochs=100,
+        training_type='all_class'
+    )
 
     # saved_weights = torch.load(model_dir, map_location=device)
     # no_net_model = CBS.BSquareModel(
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                     fns[true_label] = fns.get(true_label, 0) + 1
     print()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
-    torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_1fc_ac.pth")
+    torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_1fc_ac_full.pth")
     print(f"F1 Scores:")
     for cls in range(10):
         tp = tps.get(cls, 0)

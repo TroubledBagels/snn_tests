@@ -461,7 +461,7 @@ class BSquareModel(nn.Module):
         extras = []
         if training_type == 'noise':
             # Generate noise samples equivalent to 1/3 of the training data (i.e. 1 class worth)
-            num_noise_samples = len(tr_ds_dict[0]) # assuming balanced classes
+            num_noise_samples = len(tr_ds_dict[0]) * 8 # assuming balanced classes
             for _ in range(num_noise_samples):
                 noise_sample = torch.randn_like(train_ds[0][0])
                 noise_label = -1  # Label for noise
@@ -472,7 +472,7 @@ class BSquareModel(nn.Module):
             # Use 1/8 of each other class to avoid imbalance
             for i in range(self.num_classes):
                 if i != self.classifiers[0].c_1 and i != self.classifiers[0].c_2:
-                    extras.extend((tr_ds_dict[i][j][0], -1) for j in range(len(tr_ds_dict[i]) // 8))
+                    extras.extend((tr_ds_dict[i][j][0], -1) for j in range(len(tr_ds_dict[i])))
             print(f"Added extra samples from other classes for 'all_class' training: {len(extras)} samples.")
 
         print("Training...")
