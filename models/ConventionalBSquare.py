@@ -365,9 +365,10 @@ class SeparableMediumCNN(nn.Module):
         return x, None
 
 class BSquareModel(nn.Module):
-    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False):
+    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0):
         super(BSquareModel, self).__init__()
         self.num_classes = num_classes
+        self.threshold = threshold
         self.binary_voting = binary_voting
         self.net_out = net_out
         self.classifiers = nn.ModuleList()
@@ -414,7 +415,7 @@ class BSquareModel(nn.Module):
                     for b in range(B):
                         b_ratio = abs(out[b, 0].item() - out[b, 1].item())
                         # print(b_ratio)
-                        if abs(b_ratio) > 0.2: # Confidence Threshold
+                        if abs(b_ratio) > self.threshold: # Confidence Threshold
                             votes[b, c_1] += out[b, 0]
                             votes[b, c_2] += out[b, 1]
                             if B == 1:

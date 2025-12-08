@@ -23,6 +23,11 @@ if __name__ == '__main__':
     else:
         model_dir = "./bsquares/cifar10_bal.pth"
 
+    if len(sys.argv) > 2:
+        threshold = float(sys.argv[2])
+    else:
+        threshold = 0.0
+
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
     te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=transforms.ToTensor(), download=True)
@@ -37,7 +42,8 @@ if __name__ == '__main__':
         num_layers=3,
         binary_voting=False,
         bclass=CBS.SmallCNN,
-        net_out=False
+        net_out=False,
+        threshold=0.4
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
