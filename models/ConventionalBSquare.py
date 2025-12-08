@@ -470,7 +470,8 @@ class BSquareModel(nn.Module):
             # Use 1/8 of each other class to avoid imbalance
             for i in range(self.num_classes):
                 if i != self.classifiers[0].c_1 and i != self.classifiers[0].c_2:
-                    extras.extend((tr_ds_dict[i][:len(tr_ds_dict[i])//8][0], -1))
+                    extras.extend((tr_ds_dict[i][j][0], -1) for j in range(len(tr_ds_dict[i]) // 8))
+            print(f"Added extra samples from other classes for 'all_class' training: {len(extras)} samples.")
 
         print("Training...")
         acc_dict = {}
