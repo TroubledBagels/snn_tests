@@ -381,6 +381,7 @@ class BSquareModel(nn.Module):
                 # nn.Linear(64, num_classes)
             )
             print("Initialized ANN output layer for BSquareModel.")
+        print("Threshold:", self.threshold)
 
     def forward(self, x) -> tuple[torch.Tensor, dict]:
         B = x.size(0)
