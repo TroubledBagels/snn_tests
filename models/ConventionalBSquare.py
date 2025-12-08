@@ -214,9 +214,9 @@ class SeparableSmallCNN(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )
-        self.gap = nn.AdaptiveAvgPool2d(2)
+        self.gap = nn.AdaptiveAvgPool2d(4)
         # self.gap = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 2 * 2, 2)
+        self.fc1 = nn.Linear(64 * 4 * 4, 2)
         # self.fc2 = nn.Linear(256, 2)
 
     def forward(self, x):
