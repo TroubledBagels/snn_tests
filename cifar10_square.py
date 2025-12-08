@@ -45,14 +45,14 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    # model.load_state_dict(torch.load(model_dir, map_location=device))
-    accuracy_dict = model.train_classifiers(
-        train_ds=tr_ds,
-        test_ds=te_ds,
-        device=device,
-        epochs=100,
-        training_type='all_class'
-    )
+    model.load_state_dict(torch.load(model_dir, map_location=device))
+    # accuracy_dict = model.train_classifiers(
+    #     train_ds=tr_ds,
+    #     test_ds=te_ds,
+    #     device=device,
+    #     epochs=100,
+    #     training_type='all_class'
+    # )
 
     # saved_weights = torch.load(model_dir, map_location=device)
     # no_net_model = CBS.BSquareModel(

@@ -411,20 +411,20 @@ class BSquareModel(nn.Module):
                             vote_dict[(c_1, c_2)] = (1 if preds[b] == 0 else 0.01, 1 if preds[b] == 1 else 0.01)
                 else:
                     # add individual spikes
-                    # for b in range(B):
-                    #     b_ratio = abs(out[b, 0].item() - out[b, 1].item())
-                    #     # print(b_ratio)
-                    #     if abs(out[b, 0].item() - out[b, 1].item()) > 0.0:
-                    #         votes[b, c_1] += out[b, 0] * b_ratio
-                    #         votes[b, c_2] += out[b, 1] * b_ratio
-                    #         if B == 1:
-                    #             vote_dict[(c_1, c_2)] = (out[b, 0].item(), out[b, 1].item())
-                    #     else:
-                    #         # print("Rejected vote due to low confidence.")
-                    #         pass
-                    votes[:, c_1] += out[:, 0]
-                    votes[:, c_2] += out[:, 1]
-                    vote_dict[(c_1, c_2)] = (out[0, 0].item(), out[0, 1].item())
+                    for b in range(B):
+                        b_ratio = abs(out[b, 0].item() - out[b, 1].item())
+                        # print(b_ratio)
+                        if abs(b_ratio) > 0.2: # Confidence Threshold
+                            votes[b, c_1] += out[b, 0]
+                            votes[b, c_2] += out[b, 1]
+                            if B == 1:
+                                vote_dict[(c_1, c_2)] = (out[b, 0].item(), out[b, 1].item())
+                        else:
+                            # print("Rejected vote due to low confidence.")
+                            pass
+                    # votes[:, c_1] += out[:, 0]
+                    # votes[:, c_2] += out[:, 1]
+                    # vote_dict[(c_1, c_2)] = (out[0, 0].item(), out[0, 1].item())
         return votes, vote_dict
 
     def train_classifiers(self, train_ds, test_ds, epochs=3, lr=1e-3, device='cpu', training_type='normal'):
