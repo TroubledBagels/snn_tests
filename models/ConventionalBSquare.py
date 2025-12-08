@@ -508,7 +508,7 @@ class BSquareModel(nn.Module):
                     optimizers[idx].zero_grad()
                     output, _ = classifier(data)
                     if training_type != 'normal':
-                        output = nn.Softmax(dim=1)(output)
+                        output = nn.LogSoftmax(dim=1)(output)
                     loss = criterion(output, target_binary)
                     loss.backward()
                     mean_loss += loss.item()
