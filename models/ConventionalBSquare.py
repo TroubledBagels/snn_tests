@@ -450,7 +450,7 @@ class BSquareModel(nn.Module):
                 classifier.eval()
                 sim_weight = 1.0
                 if self.sim_weighted:
-                    sim_weight = 1 - CLASS_SIMILARITIES[(classifier.c_1, classifier.c_2)]
+                    sim_weight = 1 / (1 + CLASS_SIMILARITIES[(classifier.c_1, classifier.c_2)])
                 out, _ = classifier(x)
                 out = nn.Softmax(dim=1)(out)
                 c_1, c_2 = classifier.c_1, classifier.c_2
