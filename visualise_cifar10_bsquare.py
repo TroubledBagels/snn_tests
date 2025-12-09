@@ -10,8 +10,10 @@ if __name__ == "__main__":
     data_dir = home / 'data' / 'cifar10'
     ds = torchvision.datasets.CIFAR10(root=data_dir, train=False, download=True, transform=torchvision.transforms.ToTensor())
 
-    torch.manual_seed(47)
-    random.seed(47)
+    seed = 48
+
+    torch.manual_seed(48)
+    random.seed(48)
     dl = torch.utils.data.DataLoader(ds, batch_size=1, shuffle=True)
     sample, label = next(iter(dl))
     sample = sample.squeeze(0)
@@ -26,7 +28,7 @@ if __name__ == "__main__":
         binary_voting=False,
         bclass=CBS.SmallCNN,
         net_out=False,
-        threshold=0.25
+        threshold=0.15
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
