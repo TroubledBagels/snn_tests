@@ -13,20 +13,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import utils.heatmap as hm
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="CIFAR-10 B-Square Training and Evaluation")
+    parser.add_argument('-m', type=str, default="./bsquares/cifar10_bal.pth", help='Path to the model directory')
+    parser.add_argument('-t', type=float, default=0.0, help='Threshold for B-Square model')
+    parser.add_argument('-i', type=bool, default=False, help='Whether to retrain or only run inference')
+    return parser.parse_args()
 
 if __name__ == '__main__':
     torch.manual_seed(42)
     random.seed(42)
-
-    if len(sys.argv) > 1:
-        model_dir = sys.argv[1]
-    else:
-        model_dir = "./bsquares/cifar10_bal.pth"
-
-    if len(sys.argv) > 2:
-        threshold = float(sys.argv[2])
-    else:
-        threshold = 0.0
+    args = parse_args()
+    model_dir = args.m
+    threshold = args.t
+    retrain = args.i
 
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
