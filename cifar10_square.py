@@ -29,6 +29,7 @@ if __name__ == '__main__':
     model_dir = args.m
     threshold = args.t
     retrain = args.i
+    print(f"Parameters: m: {model_dir}, t: {threshold}, i: {retrain}")
 
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
