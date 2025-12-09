@@ -28,8 +28,8 @@ if __name__ == '__main__':
     args = parse_args()
     model_dir = args.m
     threshold = args.t
-    retrain = args.i
-    print(f"Parameters: m: {model_dir}, t: {threshold}, i: {retrain}")
+    inference_only = args.i
+    print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}")
 
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    if not retrain:
+    if inference_only:
         model.load_state_dict(torch.load(model_dir, map_location=device))
         model.threshold = threshold
         print("Model loaded for inference only.")
@@ -105,7 +105,7 @@ if __name__ == '__main__':
                     fns[true_label] = fns.get(true_label, 0) + 1
     print()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
-    if retrain:
+    if not inference_only:
         torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_1fc_noise_full.pth")
     print(f"F1 Scores:")
     for cls in range(10):
