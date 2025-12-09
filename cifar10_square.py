@@ -43,7 +43,7 @@ if __name__ == '__main__':
         input_size=3,
         hidden_size=16,
         num_layers=3,
-        binary_voting=False,
+        binary_voting=True,
         bclass=CBS.SmallCNN,
         net_out=False,
         threshold=threshold
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     print()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
     if not inference_only:
-        torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_1fc_noise_full.pth")
+        torch.save(model.state_dict(), model_dir)
     print(f"F1 Scores:")
     for cls in range(10):
         tp = tps.get(cls, 0)

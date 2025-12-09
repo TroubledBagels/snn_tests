@@ -12,6 +12,7 @@ if __name__ == "__main__":
 
     idx = random.randint(0, len(ds) - 1)
     sample = torch.tensor(ds[idx]).permute(2, 0, 1).float() / 255.0
+    print(ds[idx])
 
     print(f"Sample shape: {sample.shape}")
 
@@ -21,14 +22,14 @@ if __name__ == "__main__":
         hidden_size=64,
         num_layers=4,
         binary_voting=False,
-        bclass=CBS.TinyCNN,
+        bclass=CBS.SmallCNN,
         net_out=False
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    model.load_state_dict(torch.load("./bsquares/cifar10_bal.pth", map_location=device))
+    model.load_state_dict(torch.load("./bsquares/cifar10_bal_4conv_1fc_ac_full.pth", map_location=device))
 
     _, vote_dict = model(sample.unsqueeze(0).to(device))
     G = utils.graphing_bsquare.create_dependency_graph(vote_dict)

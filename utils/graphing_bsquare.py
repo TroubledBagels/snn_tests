@@ -14,6 +14,9 @@ def create_dependency_graph(vote_dict):
         elif c2_vote > c1_vote:
             G.add_edge(c2, c1)
         # If votes are equal, no edge is added
+    # Label nodes with number:
+    for node in G.nodes():
+        G.nodes[node]['label'] = str(node)
     return G
 
 def visualise_graph(G, title="B-Square Dependency Graph"):

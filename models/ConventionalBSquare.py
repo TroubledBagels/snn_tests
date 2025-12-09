@@ -405,12 +405,14 @@ class BSquareModel(nn.Module):
                 if self.binary_voting:
                     preds = out.argmax(dim=1)
                     for b in range(B):
-                        if preds[b] == 0:
-                            votes[b, c_1] += 1
-                        else:
-                            votes[b, c_2] += 1
-                        if B == 1:
-                            vote_dict[(c_1, c_2)] = (1 if preds[b] == 0 else 0.01, 1 if preds[b] == 1 else 0.01)
+                        b_ratio = abs(out[b, 0].item() - out[b, 1].item())
+                        if b_ratio > self.threshold:
+                            if preds[b] == 0:
+                                votes[b, c_1] += 1
+                            else:
+                                votes[b, c_2] += 1
+                            if B == 1:
+                                vote_dict[(c_1, c_2)] = (1 if preds[b] == 0 else 0.01, 1 if preds[b] == 1 else 0.01)
                 else:
                     # add individual spikes
                     for b in range(B):
