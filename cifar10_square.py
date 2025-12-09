@@ -53,15 +53,18 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    # model.load_state_dict(torch.load(model_dir, map_location=device))
-    # model.threshold = threshold
-    accuracy_dict = model.train_classifiers(
-        train_ds=tr_ds,
-        test_ds=te_ds,
-        device=device,
-        epochs=100,
-        training_type='noise'
-    )
+    if not retrain:
+        model.load_state_dict(torch.load(model_dir, map_location=device))
+        model.threshold = threshold
+        print("Model loaded for inference only.")
+    else:
+        accuracy_dict = model.train_classifiers(
+            train_ds=tr_ds,
+            test_ds=te_ds,
+            device=device,
+            epochs=100,
+            training_type='noise'
+        )
 
     # saved_weights = torch.load(model_dir, map_location=device)
     # no_net_model = CBS.BSquareModel(
