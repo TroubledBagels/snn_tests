@@ -11,6 +11,54 @@ import utils.general as g
 import cv2
 import time
 
+CLASS_SIMILARITIES = {
+    (0, 1): 0.2,
+    (0, 2): 0.46,
+    (0, 3): 0.28,
+    (0, 4): 0.39,
+    (0, 5): 0.28,
+    (0, 6): 0.24,
+    (0, 7): 0.32,
+    (0, 8): 0.58,
+    (0, 9): 0.2,
+    (1, 2): 0.0,
+    (1, 3): 0.08,
+    (1, 4): 0.01,
+    (1, 5): 0.04,
+    (1, 6): 0.05,
+    (1, 7): 0.11,
+    (1, 8): 0.15,
+    (1, 9): 0.74,
+    (2, 3): 0.74,
+    (2, 4): 0.82,
+    (2, 5): 0.74,
+    (2, 6): 0.74,
+    (2, 7): 0.63,
+    (2, 8): 0.26,
+    (2, 9): 0.09,
+    (3, 4): 0.77,
+    (3, 5): 0.87,
+    (3, 6): 0.7,
+    (3, 7): 0.72,
+    (3, 8): 0.15,
+    (3, 9): 0.21,
+    (4, 5): 0.77,
+    (4, 6): 0.77,
+    (4, 7): 0.8,
+    (4, 8): 0.2,
+    (4, 9): 0.17,
+    (5, 6): 0.62,
+    (5, 7): 0.79,
+    (5, 8): 0.14,
+    (5, 9): 0.2,
+    (6, 7): 0.43,
+    (6, 8): 0.11,
+    (6, 9): 0.11,
+    (7, 8): 0.13,
+    (7, 9): 0.37,
+    (8, 9): 0.17
+}
+
 class ListDataset(Dataset):
     def __init__(self, samples, transform=None):
         """
@@ -365,13 +413,14 @@ class SeparableMediumCNN(nn.Module):
         return x, None
 
 class BSquareModel(nn.Module):
-    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0):
+    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0, sim_weighted=False):
         super(BSquareModel, self).__init__()
         self.num_classes = num_classes
         self.threshold = threshold
         self.binary_voting = binary_voting
         self.net_out = net_out
         self.classifiers = nn.ModuleList()
+        self.sim_weighted = sim_weighted
         for i in range(num_classes):
             for j in range(i+1, num_classes):
                 self.classifiers.append(bclass(i, j, input_size, hidden_size, 2, num_layers))
@@ -399,6 +448,9 @@ class BSquareModel(nn.Module):
         else:
             for classifier in self.classifiers:
                 classifier.eval()
+                sim_weight = 1.0
+                if self.sim_weighted:
+                    sim_weight = 1 - CLASS_SIMILARITIES[(classifier.c_1, classifier.c_2)]
                 out, _ = classifier(x)
                 out = nn.Softmax(dim=1)(out)
                 c_1, c_2 = classifier.c_1, classifier.c_2
@@ -419,8 +471,8 @@ class BSquareModel(nn.Module):
                         b_ratio = abs(out[b, 0].item() - out[b, 1].item())
                         # print(b_ratio)
                         if abs(b_ratio) > self.threshold: # Confidence Threshold
-                            votes[b, c_1] += out[b, 0]
-                            votes[b, c_2] += out[b, 1]
+                            votes[b, c_1] += out[b, 0] * sim_weight
+                            votes[b, c_2] += out[b, 1] * sim_weight
                             if B == 1:
                                 vote_dict[(c_1, c_2)] = (out[b, 0].item(), out[b, 1].item())
                         else:

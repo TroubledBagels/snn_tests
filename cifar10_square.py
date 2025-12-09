@@ -21,6 +21,7 @@ def parse_args():
     parser.add_argument('-t', type=float, default=0.0, help='Threshold for B-Square model')
     parser.add_argument('-i', action='store_true', default=False, help='Run only inference if set')
     parser.add_argument('-b', action='store_true', default=False, help='Use binary voting if set')
+    parser.add_argument('-s', action='store_true', default=False, help='Use similarity weighting if set')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -31,6 +32,7 @@ if __name__ == '__main__':
     threshold = args.t
     inference_only = args.i
     binary_voting = args.b
+    similarity_weighting = args.s
     print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}")
 
     home_dir = pathlib.Path.home()
@@ -48,7 +50,8 @@ if __name__ == '__main__':
         binary_voting=binary_voting,
         bclass=CBS.SmallCNN,
         net_out=False,
-        threshold=threshold
+        threshold=threshold,
+        sim_weighted=similarity_weighting,
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
