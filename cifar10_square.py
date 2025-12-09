@@ -19,7 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="CIFAR-10 B-Square Training and Evaluation")
     parser.add_argument('-m', type=str, default="./bsquares/cifar10_bal.pth", help='Path to the model directory')
     parser.add_argument('-t', type=float, default=0.0, help='Threshold for B-Square model')
-    parser.add_argument('-i', type=bool, default=False, help='Whether to retrain or only run inference')
+    parser.add_argument('-i', action='store_true', default=False, help='Run only inference if set')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -104,7 +104,8 @@ if __name__ == '__main__':
                     fns[true_label] = fns.get(true_label, 0) + 1
     print()
     print(f'Test Accuracy of the model on the 10000 test images: {100 * correct / total} %')
-    torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_1fc_noise_full.pth")
+    if retrain:
+        torch.save(model.state_dict(), "./bsquares/cifar10_bal_4conv_1fc_noise_full.pth")
     print(f"F1 Scores:")
     for cls in range(10):
         tp = tps.get(cls, 0)
