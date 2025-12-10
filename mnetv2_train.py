@@ -73,14 +73,16 @@ if __name__ == "__main__":
         model = SmallCNN(1, 2, 1, 1, 2).to(device)
     else:
         print(f"Unknown model name: {model_name}. Using SmallCNN as default.")
-        model = SmallCNN(1, 2, 1, 1, 2).to(device)
+        model = SmallCNN(1, 2, 1, 1, 2).to(device)\
+
+    print(f"Using model: {model_name}.")
 
     # model = GoogLeNet(num_classes=10).to(device)
     # model = SmallCNN(1, 2, 1, 1, 2).to(device)
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    for epoch in range(2):
+    for epoch in range(10):
         # pbar = tqdm.tqdm(tr_dl)
         # running_loss = 0.0
         # for images, labels in pbar:
