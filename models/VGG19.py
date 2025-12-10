@@ -85,8 +85,49 @@ class VGG19(nn.Module):
         x = self.classifier(x)
         return x
 
+import torch
+import torch.nn as nn
+
+class VGG11(nn.Module):
+    def __init__(self, num_classes=10, dropout_rate=0.5):
+        super(VGG11, self).__init__()
+
+        self.conv_block1 = self._make_conv_block(3, 64, 2)
+        self.conv_block2 = self._make_conv_block(64, 128, 2)
+        self.conv_block3 = self._make_conv_block(128, 256, 3)
+        self.conv_block4 = self._make_conv_block(256, 512, 3)
+        self.conv_block5 = self._make_conv_block(512, 512, 3)
+
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(512, num_classes)
+
+    def _make_conv_block(self, in_channels, out_channels, num_convs):
+        layers = []
+        layers.append(nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1))
+        layers.append(nn.BatchNorm2d(out_channels))  # BatchNorm after the convolution
+        layers.append(nn.ReLU())
+        for _ in range(num_convs - 1):
+            layers.append(nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1))
+            layers.append(nn.BatchNorm2d(out_channels))  # BatchNorm after the convolution
+            layers.append(nn.ReLU())
+        layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.conv_block1(x)
+        x = self.conv_block2(x)
+        x = self.conv_block3(x)
+        x = self.conv_block4(x)
+        x = self.conv_block5(x)
+
+        x = self.avg_pool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+
+        return x
+
 if __name__ == '__main__':
-    model = VGG19(num_classes=10)
+    model = VGG11(num_classes=10)
     print(model)
     sample_input = torch.randn(1, 3, 32, 32)
     output = model(sample_input)
