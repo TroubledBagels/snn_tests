@@ -61,7 +61,10 @@ if __name__ == "__main__":
         qbar = tqdm.tqdm(te_dl)
         with torch.no_grad():
             for images, labels in qbar:
-                outputs = model(images)
+                if isinstance(model, SmallCNN):
+                    outputs, _ = model(images)
+                else:
+                    outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
