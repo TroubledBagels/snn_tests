@@ -1,0 +1,95 @@
+import torch
+import torch.nn as nn
+
+class ConvModule(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
+        super(ConvModule, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.relu(x)
+        return x
+
+class InceptionModule(nn.Module):
+    def __init__(self, in_channels, out_1x1, red_3x3, out_3x3, red_5x5, out_5x5, out_pool):
+        super(InceptionModule, self).__init__()
+        self.branch1 = ConvModule(in_channels, out_1x1, kernel_size=1)
+
+        self.branch2 = nn.Sequential(
+            ConvModule(in_channels, red_3x3, kernel_size=1),
+            ConvModule(red_3x3, out_3x3, kernel_size=3, padding=1)
+        )
+
+        self.branch3 = nn.Sequential(
+            ConvModule(in_channels, red_5x5, kernel_size=1),
+            ConvModule(red_5x5, out_5x5, kernel_size=5, padding=2)
+        )
+
+        self.branch4 = nn.Sequential(
+            nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
+            ConvModule(in_channels, out_pool, kernel_size=1)
+        )
+
+    def forward(self, x):
+        branch1 = self.branch1(x)
+        branch2 = self.branch2(x)
+        branch3 = self.branch3(x)
+        branch4 = self.branch4(x)
+        outputs = [branch1, branch2, branch3, branch4]
+        return torch.cat(outputs, 1)
+
+class DownsampleModule(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(DownsampleModule, self).__init__()
+        self.conv = ConvModule(in_channels, out_channels, kernel_size=3, stride=2, padding=1)
+        self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+    def forward(self, x):
+        conv_out = self.conv(x)
+        pool_out = self.pool(x)
+        return torch.cat([conv_out, pool_out], 1)
+
+class GoogLeNet(nn.Module):
+    def __init__(self, num_classes=10):
+        super(GoogLeNet, self).__init__()
+        self.pre_layers = nn.Sequential(
+            ConvModule(3, 96, kernel_size=3, stride=1, padding=1)
+        )
+
+        self.block_group_1 = nn.Sequential(
+            InceptionModule(96, 32, 32 ,32 ,32, 32, 32),
+            InceptionModule(128, 32, 48,  48, 48, 48, 32),
+            DownsampleModule(160, 80)
+        )
+
+        self.block_group_2 = nn.Sequential(
+            InceptionModule(240, 112, 48, 48, 32, 32, 48),
+            InceptionModule(240, 96, 64, 64, 32, 32, 32),
+            InceptionModule(224, 80, 80, 80, 32, 32, 32),
+            InceptionModule(224, 48, 96, 96, 32, 32, 32),
+            InceptionModule(208, 112, 48, 48, 32, 32, 48),
+            DownsampleModule(240, 96)
+        )
+
+        self.block_group_3 = nn.Sequential(
+            InceptionModule(96, 176, 160, 160, 96, 96, 96),
+            InceptionModule(528, 176, 160, 160, 96, 96, 96)
+        )
+
+        self.classifier_head = nn.Sequential(
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten(),
+            nn.Linear(528, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.pre_layers(x)
+        x = self.block_group_1(x)
+        x = self.block_group_2(x)
+        x = self.block_group_3(x)
+        x = self.classifier_head(x)
+        return x

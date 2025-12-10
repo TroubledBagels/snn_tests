@@ -11,7 +11,9 @@ current_known = { # Example format: "Model Name": (accuracy, latency (ms))
     "AlexNet": (90, 53.47),
     "LeNet": (80.86, 5.58),
     "VGG19": (93.95, 54),
-    "VGG11": (92.39, 34)
+    "VGG11": (92.39, 34),
+    "EfficientNetB0": (93.44, 29),
+    "GoogLeNet": ()
 }
 
 # plot the above as a labelled scatter plot

@@ -15,6 +15,7 @@ from models.AlexNet import AlexNet
 from models.LeNet import LeNet
 from models.VGG19 import VGG19, VGG11
 from models.EfficientNetB0 import EfficientNetB0
+from models.GoogLeNet import GoogLeNet
 
 if __name__ == "__main__":
     tr_ds = torchvision.datasets.CIFAR10(
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
 
-    model = EfficientNetB0(num_classes=10)
+    model = GoogLeNet(num_classes=10)
 
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
