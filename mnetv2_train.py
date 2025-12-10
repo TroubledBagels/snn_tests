@@ -11,6 +11,7 @@ from models.MobileNetV2 import MobileNetV2
 from models.MobileNetV3 import MobileNetV3
 from models.WideResNet import WideResNet
 from models.ResNet18 import ResNet18
+from models.AlexNet import AlexNet
 
 if __name__ == "__main__":
     tr_ds = torchvision.datasets.CIFAR10(
