@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument('-i', action='store_true', default=False, help='Run only inference if set')
     parser.add_argument('-b', action='store_true', default=False, help='Use binary voting if set')
     parser.add_argument('-s', action='store_true', default=False, help='Use similarity weighting if set')
+    parser.add_argument('-ns', action='store_true', default=False, help='Do not use softmax if set')
     return parser.parse_args()
 
 if __name__ == '__main__':
