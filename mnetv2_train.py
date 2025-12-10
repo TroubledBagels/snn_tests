@@ -16,9 +16,51 @@ from models.LeNet import LeNet
 from models.VGG19 import VGG19, VGG11
 from models.EfficientNetB0 import EfficientNetB0
 from models.GoogLeNet import GoogLeNet
-from models.ConventionalBSquare import SmallCNN
 
 import argparse
+
+class SmallCNN(nn.Module):
+    def __init__(self, c_1, c_2, hid, inp, out, num_layers=2):
+        super(SmallCNN, self).__init__()
+        self.c_1 = c_1
+        self.c_2 = c_2
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(32)
+        self.do = nn.Dropout(0.2)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(64)
+        self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn4 = nn.BatchNorm2d(64)
+        self.gap = nn.AdaptiveAvgPool2d(2)
+        # self.gap = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(64 * 2 * 2, 2)
+        # self.fc2 = nn.Linear(256, 2)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = torch.relu(x)
+        x = self.do(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = torch.relu(x)
+        x = self.pool(x)
+        x = self.conv3(x)
+        x = self.bn3(x)
+        x = torch.relu(x)
+        x = self.do(x)
+        x = self.conv4(x)
+        x = self.bn4(x)
+        x = torch.relu(x)
+        x = self.gap(x)
+        x = nn.Flatten()(x)
+        x = self.fc1(x)
+        # x = torch.relu(x)
+        # x = self.fc2(x)
+        return x, None
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -73,7 +115,7 @@ if __name__ == "__main__":
         model = SmallCNN(1, 2, 1, 1, 2).to(device)
     else:
         print(f"Unknown model name: {model_name}. Using SmallCNN as default.")
-        model = SmallCNN(1, 2, 1, 1, 2).to(device)\
+        model = SmallCNN(1, 2, 1, 1, 2).to(device)
 
     print(f"Using model: {model_name}.")
 
