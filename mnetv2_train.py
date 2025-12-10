@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from models.MobileNetV2 import MobileNetV2
 from models.MobileNetV3 import MobileNetV3
 from models.WideResNet import WideResNet
+from models.ResNet18 import ResNet18
 
 if __name__ == "__main__":
     tr_ds = torchvision.datasets.CIFAR10(
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
 
-    model = MobileNetV3(num_classes=10)
+    model = ResNet18(num_classes=10)
 
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
