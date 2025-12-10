@@ -86,38 +86,38 @@ class ListDataset(Dataset):
         return events, label
 
 if __name__ == "__main__":
-    tr_ds = torchvision.datasets.CIFAR10(
-        root=pathlib.Path.home() / 'data' / 'cifar10',
-        train=True,
-        download=True,
-        transform=transforms.ToTensor()
-    )
-
-    te_ds = torchvision.datasets.CIFAR10(
-        root=pathlib.Path.home() / 'data' / 'cifar10',
-        train=False,
-        download=True,
-        transform=transforms.ToTensor()
-    )
-
-    tr_list = []
-    for i in range(len(tr_ds)):
-        tr_list.append((tr_ds[i][0], tr_ds[i][1]))
-
-    te_list = []
-    for i in range(len(te_ds)):
-        te_list.append((te_ds[i][0], te_ds[i][1]))
-
-    tr_list_ds = ListDataset(tr_list, transform=None)
-    te_list_ds = ListDataset(te_list, transform=None)
+    # tr_ds = torchvision.datasets.CIFAR10(
+    #     root=pathlib.Path.home() / 'data' / 'cifar10',
+    #     train=True,
+    #     download=True,
+    #     transform=transforms.ToTensor()
+    # )
+    #
+    # te_ds = torchvision.datasets.CIFAR10(
+    #     root=pathlib.Path.home() / 'data' / 'cifar10',
+    #     train=False,
+    #     download=True,
+    #     transform=transforms.ToTensor()
+    # )
+    #
+    # tr_list = []
+    # for i in range(len(tr_ds)):
+    #     tr_list.append((tr_ds[i][0], tr_ds[i][1]))
+    #
+    # te_list = []
+    # for i in range(len(te_ds)):
+    #     te_list.append((te_ds[i][0], te_ds[i][1]))
+    #
+    # tr_list_ds = ListDataset(tr_list, transform=None)
+    # te_list_ds = ListDataset(te_list, transform=None)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-
-    print(f"Dataset size: {len(tr_ds)}")
-
-    tr_dl = DataLoader(tr_list_ds, batch_size=64, shuffle=True)
-    te_dl = DataLoader(te_list_ds, batch_size=1, shuffle=False)
+    #
+    # print(f"Dataset size: {len(tr_ds)}")
+    #
+    # tr_dl = DataLoader(tr_list_ds, batch_size=64, shuffle=True)
+    # te_dl = DataLoader(te_list_ds, batch_size=1, shuffle=False)
 
     model_name = parse_args().m.lower()
     if model_name == 'mnv2':
@@ -147,35 +147,36 @@ if __name__ == "__main__":
         model = SmallCNN(1, 2, 1, 1, 2).to(device)
 
     print(f"Using model: {model_name}.")
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
+    #
+    # # model = GoogLeNet(num_classes=10).to(device)
+    # # model = SmallCNN(1, 2, 1, 1, 2).to(device)
+    # criterion = nn.CrossEntropyLoss()
+    # optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    # model = GoogLeNet(num_classes=10).to(device)
-    # model = SmallCNN(1, 2, 1, 1, 2).to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
-
-    for epoch in range(3):
-        # pbar = tqdm.tqdm(tr_dl)
-        # running_loss = 0.0
-        # for images, labels in pbar:
-        #     optimiser.zero_grad()
-        #     outputs = model(images)
-        #     loss = criterion(outputs, labels)
-        #     loss.backward()
-        #     optimiser.step()
-        #
-        #     running_loss += loss.item()
-        #     pbar.set_description(f"Epoch {epoch+1}, Loss: {running_loss / (pbar.n + 1):.4f}")
-
-        correct = 0
-        total = 0
-        qbar = tqdm.tqdm(te_dl)
-        with torch.no_grad():
-            for images, labels in qbar:
-                images, labels = images.to(device), labels.to(device)
-                outputs = model(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-                qbar.set_description(f"Epoch {epoch+1}, Test Accuracy: {100 * correct / total:.2f}%")
+    # for epoch in range(3):
+    #     # pbar = tqdm.tqdm(tr_dl)
+    #     # running_loss = 0.0
+    #     # for images, labels in pbar:
+    #     #     optimiser.zero_grad()
+    #     #     outputs = model(images)
+    #     #     loss = criterion(outputs, labels)
+    #     #     loss.backward()
+    #     #     optimiser.step()
+    #     #
+    #     #     running_loss += loss.item()
+    #     #     pbar.set_description(f"Epoch {epoch+1}, Loss: {running_loss / (pbar.n + 1):.4f}")
+    #
+    #     correct = 0
+    #     total = 0
+    #     qbar = tqdm.tqdm(te_dl)
+    #     with torch.no_grad():
+    #         for images, labels in qbar:
+    #             images, labels = images.to(device), labels.to(device)
+    #             outputs = model(images)
+    #             _, predicted = torch.max(outputs.data, 1)
+    #             total += labels.size(0)
+    #             correct += (predicted == labels).sum().item()
+    #             qbar.set_description(f"Epoch {epoch+1}, Test Accuracy: {100 * correct / total:.2f}%")
 
     print("Training complete.")
