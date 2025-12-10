@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print(f"Dataset size: {len(tr_ds)}")
 
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
-    te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
+    te_dl = DataLoader(te_ds, batch_size=1, shuffle=False)
 
     model = GoogLeNet(num_classes=10)
 
@@ -43,17 +43,17 @@ if __name__ == "__main__":
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
     for epoch in range(50):
-        pbar = tqdm.tqdm(tr_dl)
-        running_loss = 0.0
-        for images, labels in pbar:
-            optimiser.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimiser.step()
-
-            running_loss += loss.item()
-            pbar.set_description(f"Epoch {epoch+1}, Loss: {running_loss / (pbar.n + 1):.4f}")
+        # pbar = tqdm.tqdm(tr_dl)
+        # running_loss = 0.0
+        # for images, labels in pbar:
+        #     optimiser.zero_grad()
+        #     outputs = model(images)
+        #     loss = criterion(outputs, labels)
+        #     loss.backward()
+        #     optimiser.step()
+        #
+        #     running_loss += loss.item()
+        #     pbar.set_description(f"Epoch {epoch+1}, Loss: {running_loss / (pbar.n + 1):.4f}")
 
         correct = 0
         total = 0

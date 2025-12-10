@@ -110,13 +110,9 @@ class GoogLeNet(nn.Module):
 
     def forward(self, x):
         x = self.pre_layers(x)
-        print(x.shape)
         x = self.block_group_1(x)
-        print(x.shape)
         x = self.block_group_2(x)
-        print(x.shape)
         x = self.block_group_3(x)
-        print(x.shape)
         x = self.classifier_head(x)
         return x
 
