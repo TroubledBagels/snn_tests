@@ -76,7 +76,7 @@ class GoogLeNet(nn.Module):
         )
 
         self.block_group_3 = nn.Sequential(
-            InceptionModule(96, 176, 160, 160, 96, 96, 96),
+            InceptionModule(336, 176, 160, 160, 96, 96, 96),
             InceptionModule(528, 176, 160, 160, 96, 96, 96)
         )
 
@@ -88,8 +88,19 @@ class GoogLeNet(nn.Module):
 
     def forward(self, x):
         x = self.pre_layers(x)
+        print(x.shape)
         x = self.block_group_1(x)
+        print(x.shape)
         x = self.block_group_2(x)
+        print(x.shape)
         x = self.block_group_3(x)
+        print(x.shape)
         x = self.classifier_head(x)
         return x
+
+if __name__ == '__main__':
+    model = GoogLeNet(num_classes=10)
+    print(model)
+    sample_input = torch.randn(1, 3, 32, 32)
+    output = model(sample_input)
+    print(output.shape)
