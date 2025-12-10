@@ -35,12 +35,34 @@ class InceptionModule(nn.Module):
         )
 
     def forward(self, x):
-        branch1 = self.branch1(x)
-        branch2 = self.branch2(x)
-        branch3 = self.branch3(x)
-        branch4 = self.branch4(x)
-        outputs = [branch1, branch2, branch3, branch4]
-        return torch.cat(outputs, 1)
+        if not x.is_cuda:
+            # On CPU, just do sequential
+            b1 = self.branch1(x)
+            b2 = self.branch2(x)
+            b3 = self.branch3(x)
+            b4 = self.branch4(x)
+            return torch.cat([b1, b2, b3, b4], dim=1)
+
+        # Create streams
+        s1 = torch.cuda.Stream()
+        s2 = torch.cuda.Stream()
+        s3 = torch.cuda.Stream()
+        s4 = torch.cuda.Stream()
+
+        # Launch branches in different streams
+        with torch.cuda.stream(s1):
+            out1 = self.branch1(x)
+        with torch.cuda.stream(s2):
+            out2 = self.branch2(x)
+        with torch.cuda.stream(s3):
+            out3 = self.branch3(x)
+        with torch.cuda.stream(s4):
+            out4 = self.branch4(x)
+
+        # Sync all streams with default before concat
+        torch.cuda.synchronize()
+
+        return torch.cat([out1, out2, out3, out4], dim=1)
 
 class DownsampleModule(nn.Module):
     def __init__(self, in_channels, out_channels):
