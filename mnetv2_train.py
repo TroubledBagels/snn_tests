@@ -100,8 +100,16 @@ if __name__ == "__main__":
         transform=transforms.ToTensor()
     )
 
-    tr_list_ds = ListDataset(tr_ds, transform=None)
-    te_list_ds = ListDataset(te_ds, transform=None)
+    tr_list = []
+    for i in range(len(tr_ds)):
+        tr_list.append((tr_ds[i][0], tr_ds[i][1]))
+
+    te_list = []
+    for i in range(len(te_ds)):
+        te_list.append((te_ds[i][0], te_ds[i][1]))
+
+    tr_list_ds = ListDataset(tr_list, transform=None)
+    te_list_ds = ListDataset(te_list, transform=None)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -109,7 +117,7 @@ if __name__ == "__main__":
     print(f"Dataset size: {len(tr_ds)}")
 
     tr_dl = DataLoader(tr_list_ds, batch_size=64, shuffle=True)
-    te_dl = DataLoader(te_list_ds, batch_size=100, shuffle=False)
+    te_dl = DataLoader(te_list_ds, batch_size=64, shuffle=False)
 
     model_name = parse_args().m.lower()
     if model_name == 'mnv2':
