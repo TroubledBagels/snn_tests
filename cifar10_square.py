@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('-b', action='store_true', default=False, help='Use binary voting if set')
     parser.add_argument('-s', action='store_true', default=False, help='Use similarity weighting if set')
     parser.add_argument('-ns', action='store_true', default=False, help='Do not use softmax if set')
+    parser.add_argument('-g', action='store_true', default=False, help='Use graph-based read-out if set')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -34,6 +35,8 @@ if __name__ == '__main__':
     inference_only = args.i
     binary_voting = args.b
     similarity_weighting = args.s
+    no_softmax = args.ns
+    graph_readout = args.g
     print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}")
 
     home_dir = pathlib.Path.home()
@@ -53,6 +56,8 @@ if __name__ == '__main__':
         net_out=False,
         threshold=threshold,
         sim_weighted=similarity_weighting,
+        use_soft= ~no_softmax,
+        graph_based=graph_readout
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)

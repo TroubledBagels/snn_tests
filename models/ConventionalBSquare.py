@@ -413,7 +413,7 @@ class SeparableMediumCNN(nn.Module):
         return x, None
 
 class BSquareModel(nn.Module):
-    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0, sim_weighted=False, use_soft=False):
+    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0, sim_weighted=False, use_soft=False, graph_based=False):
         super(BSquareModel, self).__init__()
         self.num_classes = num_classes
         self.use_soft = use_soft
@@ -566,7 +566,7 @@ class BSquareModel(nn.Module):
 
                     optimizers[idx].zero_grad()
                     output, _ = classifier(data)
-                    if training_type != 'normal':
+                    if training_type != 'normal' and self.use_soft:
                         output = nn.LogSoftmax(dim=1)(output)
                     loss = criterion(output, target_binary)
                     loss.backward()
