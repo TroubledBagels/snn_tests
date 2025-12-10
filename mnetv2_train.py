@@ -38,8 +38,8 @@ if __name__ == "__main__":
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
 
-    model = GoogLeNet(num_classes=10)
-    # model = SmallCNN(1, 2, 1, 1, 2)
+    # model = GoogLeNet(num_classes=10)
+    model = SmallCNN(1, 2, 1, 1, 2)
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
