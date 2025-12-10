@@ -117,7 +117,7 @@ if __name__ == "__main__":
     print(f"Dataset size: {len(tr_ds)}")
 
     tr_dl = DataLoader(tr_list_ds, batch_size=64, shuffle=True)
-    te_dl = DataLoader(te_list_ds, batch_size=64, shuffle=False)
+    te_dl = DataLoader(te_list_ds, batch_size=1, shuffle=False)
 
     model_name = parse_args().m.lower()
     if model_name == 'mnv2':
