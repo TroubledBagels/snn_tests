@@ -413,9 +413,10 @@ class SeparableMediumCNN(nn.Module):
         return x, None
 
 class BSquareModel(nn.Module):
-    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0, sim_weighted=False):
+    def __init__(self, num_classes: int, input_size=30, hidden_size=32, num_layers=2, binary_voting=False, bclass=BClassifier, net_out=False, threshold=0.0, sim_weighted=False, use_soft=False):
         super(BSquareModel, self).__init__()
         self.num_classes = num_classes
+        self.use_soft = use_soft
         self.threshold = threshold
         self.binary_voting = binary_voting
         self.net_out = net_out
@@ -452,7 +453,8 @@ class BSquareModel(nn.Module):
                 if self.sim_weighted:
                     sim_weight = 1 / (1 + CLASS_SIMILARITIES[(classifier.c_1, classifier.c_2)])
                 out, _ = classifier(x)
-                out = nn.Softmax(dim=1)(out)
+                if self.use_soft:
+                    out = nn.Softmax(dim=1)(out)
                 c_1, c_2 = classifier.c_1, classifier.c_2
                 if self.binary_voting:
                     preds = out.argmax(dim=1)
