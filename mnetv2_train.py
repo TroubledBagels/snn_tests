@@ -80,7 +80,7 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    for epoch in range(50):
+    for epoch in range(2):
         # pbar = tqdm.tqdm(tr_dl)
         # running_loss = 0.0
         # for images, labels in pbar:
