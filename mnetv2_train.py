@@ -1,6 +1,7 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from torch.utils.data import Dataset
 import pathlib
 
 import tqdm
@@ -67,6 +68,23 @@ def parse_args():
     parser.add_argument('-m', type=str, default='mnv2', help='Model to use: mnv2, mnv3, wrn, rn18, an, le, vgg19, vgg11, enb0, gn, scnn')
     return parser.parse_args()
 
+class ListDataset(Dataset):
+    def __init__(self, samples, transform=None):
+        """
+        samples: list of (events, label)
+        """
+        self.samples = samples
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        events, label = self.samples[idx]
+        if self.transform is not None:
+            events = self.transform(events)  # ToFrame applied per sample
+        return events, label
+
 if __name__ == "__main__":
     tr_ds = torchvision.datasets.CIFAR10(
         root=pathlib.Path.home() / 'data' / 'cifar10',
@@ -82,13 +100,16 @@ if __name__ == "__main__":
         transform=transforms.ToTensor()
     )
 
+    tr_list_ds = ListDataset(tr_ds, transform=None)
+    te_list_ds = ListDataset(te_ds, transform=None)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
     print(f"Dataset size: {len(tr_ds)}")
 
-    tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
-    te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
+    tr_dl = DataLoader(tr_list_ds, batch_size=64, shuffle=True)
+    te_dl = DataLoader(te_list_ds, batch_size=100, shuffle=False)
 
     model_name = parse_args().m.lower()
     if model_name == 'mnv2':
