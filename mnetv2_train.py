@@ -60,7 +60,7 @@ class SmallCNN(nn.Module):
         x = self.fc1(x)
         # x = torch.relu(x)
         # x = self.fc2(x)
-        return x, None
+        return x
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -143,10 +143,7 @@ if __name__ == "__main__":
         with torch.no_grad():
             for images, labels in qbar:
                 images, labels = images.to(device), labels.to(device)
-                if isinstance(model, SmallCNN):
-                    outputs, _ = model(images)
-                else:
-                    outputs = model(images)
+                outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
