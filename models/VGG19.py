@@ -129,6 +129,7 @@ class VGG11(nn.Module):
 if __name__ == '__main__':
     model = VGG11(num_classes=10)
     print(model)
+    print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
     sample_input = torch.randn(1, 3, 32, 32)
     output = model(sample_input)
     print(output.shape)
