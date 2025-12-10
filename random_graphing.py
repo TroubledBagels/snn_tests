@@ -9,7 +9,8 @@ current_known = { # Example format: "Model Name": (accuracy, latency (ms))
     "WideResNet 28-10": (99.0, 47),
     "SmallCNN Ensemble": (82.89, 2.2),
     "AlexNet": (90, 53.47),
-    "LeNet":
+    "LeNet": (72, 5.58),
+    "VGG19": (92.31,)
 }
 
 # plot the above as a labelled scatter plot
@@ -22,6 +23,6 @@ plt.xlabel('Theoretical Latency (ms)')
 plt.ylabel('Accuracy (%)')
 plt.title('Model Accuracy vs Latency on CIFAR-10')
 plt.xlim(0, 60)
-plt.ylim(80, 100)
+plt.ylim(70, 100)
 plt.grid(True)
 plt.show()

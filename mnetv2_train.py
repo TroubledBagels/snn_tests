@@ -13,6 +13,7 @@ from models.WideResNet import WideResNet
 from models.ResNet18 import ResNet18
 from models.AlexNet import AlexNet
 from models.LeNet import LeNet
+from models.VGG19 import VGG19
 
 if __name__ == "__main__":
     tr_ds = torchvision.datasets.CIFAR10(
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
 
-    model = LeNet(num_classes=10)
+    model = VGG19(num_classes=10)
 
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
