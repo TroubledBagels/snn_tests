@@ -24,9 +24,10 @@ current_known_bs_64 = {
     "ResNet18": (95, 19),
     "AlexNet": (90, 18.7),
     "LeNet": (80.86, 150),
-    "VGG19": (93,95, 18.5),
+    "VGG19": (93.95, 18.5),
     "VGG11": (92.39, 29),
     "EfficientNetB0": (93.44, 34),
+    "GoogLeNet": (93.57, 6.4)
 }
 
 # plot the above as a labelled scatter plot
@@ -39,6 +40,20 @@ plt.xlabel('Theoretical Latency it/s (Batch size 1)')
 plt.ylabel('Accuracy (%)')
 plt.title('Model Accuracy vs Latency on CIFAR-10')
 plt.xlim(0, 1600)
+plt.ylim(80, 100)
+plt.grid(True)
+plt.show()
+
+print(current_known_bs_64.items())
+
+plt.figure(figsize=(10, 6))
+for model_name, (accuracy, latency) in current_known_bs_64.items():
+    plt.scatter(latency, accuracy, label=model_name)
+    plt.text(latency + 0.5, accuracy - 0.2, model_name, fontsize=9)
+plt.xlabel('Theoretical Latency it/s (Batch size 64)')
+plt.ylabel('Accuracy (%)')
+plt.title('Model Accuracy vs Latency on CIFAR-10')
+plt.xlim(0, 500)
 plt.ylim(80, 100)
 plt.grid(True)
 plt.show()

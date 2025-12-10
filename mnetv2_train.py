@@ -33,13 +33,16 @@ if __name__ == "__main__":
         transform=transforms.ToTensor()
     )
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
     print(f"Dataset size: {len(tr_ds)}")
 
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
 
-    # model = GoogLeNet(num_classes=10)
-    model = SmallCNN(1, 2, 1, 1, 2)
+    # model = GoogLeNet(num_classes=10).to(device)
+    model = SmallCNN(1, 2, 1, 1, 2).to(device)
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -61,6 +64,7 @@ if __name__ == "__main__":
         qbar = tqdm.tqdm(te_dl)
         with torch.no_grad():
             for images, labels in qbar:
+                images, labels = images.to(device), labels.to(device)
                 if isinstance(model, SmallCNN):
                     outputs, _ = model(images)
                 else:
