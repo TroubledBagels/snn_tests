@@ -8,7 +8,8 @@ current_known = { # Example format: "Model Name": (accuracy, latency (ms))
     "MobileNetV3": (95.8, 45),
     "WideResNet 28-10": (99.0, 47),
     "SmallCNN Ensemble": (82.89, 2.2),
-    "AlexNet": (90, 52)
+    "AlexNet": (90, 53.47),
+    "LeNet":
 }
 
 # plot the above as a labelled scatter plot
