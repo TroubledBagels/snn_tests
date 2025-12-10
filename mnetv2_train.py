@@ -18,6 +18,13 @@ from models.EfficientNetB0 import EfficientNetB0
 from models.GoogLeNet import GoogLeNet
 from models.ConventionalBSquare import SmallCNN
 
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', type=str, default='mnv2', help='Model to use: mnv2, mnv3, wrn, rn18, an, le, vgg19, vgg11, enb0, gn, scnn')
+    return parser.parse_args()
+
 if __name__ == "__main__":
     tr_ds = torchvision.datasets.CIFAR10(
         root=pathlib.Path.home() / 'data' / 'cifar10',
@@ -41,8 +48,35 @@ if __name__ == "__main__":
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=64, shuffle=False)
 
+    model_name = parse_args().m.lower()
+    if model_name == 'mnv2':
+        model = MobileNetV2(num_classes=10).to(device)
+    elif model_name == 'mnv3':
+        model = MobileNetV3(num_classes=10).to(device)
+    elif model_name == 'wrn':
+        model = WideResNet(depth=28, width=10, num_classes=10).to(device)
+    elif model_name == 'rn18':
+        model = ResNet18(num_classes=10).to(device)
+    elif model_name == 'an':
+        model = AlexNet(num_classes=10).to(device)
+    elif model_name == 'le':
+        model = LeNet(num_classes=10).to(device)
+    elif model_name == 'vgg19':
+        model = VGG19(num_classes=10).to(device)
+    elif model_name == 'vgg11':
+        model = VGG11(num_classes=10).to(device)
+    elif model_name == 'enb0':
+        model = EfficientNetB0(num_classes=10).to(device)
+    elif model_name == 'gn':
+        model = GoogLeNet(num_classes=10).to(device)
+    elif model_name == 'scnn':
+        model = SmallCNN(1, 2, 1, 1, 2).to(device)
+    else:
+        print(f"Unknown model name: {model_name}. Using SmallCNN as default.")
+        model = SmallCNN(1, 2, 1, 1, 2).to(device)
+
     # model = GoogLeNet(num_classes=10).to(device)
-    model = SmallCNN(1, 2, 1, 1, 2).to(device)
+    # model = SmallCNN(1, 2, 1, 1, 2).to(device)
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
