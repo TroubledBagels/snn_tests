@@ -37,7 +37,7 @@ if __name__ == '__main__':
     similarity_weighting = args.s
     no_softmax = args.ns
     graph_readout = args.g
-    print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}")
+    print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}, b: {binary_voting}, s: {similarity_weighting}, ns: {no_softmax}, g: {graph_readout}")
 
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
