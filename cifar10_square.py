@@ -56,7 +56,7 @@ if __name__ == '__main__':
         net_out=False,
         threshold=threshold,
         sim_weighted=similarity_weighting,
-        use_soft= ~no_softmax,
+        no_soft=no_softmax,
         graph_based=graph_readout
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
