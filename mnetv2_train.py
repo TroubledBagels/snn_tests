@@ -37,7 +37,7 @@ if __name__ == "__main__":
     tr_dl = DataLoader(tr_ds, batch_size=64, shuffle=True)
     te_dl = DataLoader(te_ds, batch_size=1, shuffle=False)
 
-    model = EfficientNetB0(num_classes=10)
+    model = VGG19(num_classes=10)
 
     criterion = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
