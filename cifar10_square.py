@@ -71,6 +71,15 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(model_dir, map_location=device))
         model.threshold = threshold
         print("Model loaded for inference only.")
+    elif linear_readout:
+        model.load_from_no_net(torch.load(model_dir, map_location=device))
+        accuracy_dict = model.train_output_layer(
+            tr_ds=tr_ds,
+            te_ds=te_ds,
+            epochs=100,
+            lr=1e-3,
+            device=device
+        )
     else:
         accuracy_dict = model.train_classifiers(
             train_ds=tr_ds,
@@ -95,9 +104,7 @@ if __name__ == '__main__':
     # model.load_from_no_net(no_net_model)
     # model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
 
-    if linear_readout:
-        model.load_state_dict(torch.load(model_dir, map_location=device))
-        model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
+
 
     model.eval()
     correct = 0
