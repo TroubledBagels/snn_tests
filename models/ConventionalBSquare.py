@@ -443,7 +443,7 @@ class BSquareModel(nn.Module):
                 for classifier in self.classifiers:
                     classifier.eval()
                     out, _ = classifier(x)
-                    out_list.append(nn.Softmax(out))
+                    out_list.append(nn.Softmax(dim=1)(out))
             else:
                 stream_list = []
                 for classifier in self.classifiers:
@@ -454,7 +454,7 @@ class BSquareModel(nn.Module):
                 for idx, classifier in enumerate(self.classifiers):
                     with torch.cuda.stream(stream_list[idx]):
                         out, _ = classifier(x)
-                        out_list.append(nn.Softmax(out))
+                        out_list.append(nn.Softmax(dim=1)(out))
                 for stream in stream_list:
                     stream.synchronize()
             out_tensor = torch.cat(out_list, dim=1)
