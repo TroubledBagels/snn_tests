@@ -653,7 +653,7 @@ class BSquareModel(nn.Module):
                 data = data.float()
                 data, target = data.to(device), target.to(device)
                 optimiser.zero_grad()
-                output = self.forward(data)
+                output, _ = self.forward(data)
                 loss = criterion(output, target)
                 loss.backward()
                 mean_loss += loss.item()
@@ -668,7 +668,7 @@ class BSquareModel(nn.Module):
                 for data, target in pbar:
                     data = data.float()
                     data, target = data.to(device), target.to(device)
-                    output = self.forward(data)
+                    output, _ = self.forward(data)
                     preds = output.argmax(dim=1)
                     correct += (preds == target).sum().item()
                     total += target.size(0)
