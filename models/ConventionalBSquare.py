@@ -459,7 +459,7 @@ class BSquareModel(nn.Module):
                     stream.synchronize()
             out_tensor = torch.cat(out_list, dim=1)
             ann_out = self.out_layer(out_tensor)
-            return ann_out
+            return ann_out, {}
         else:
             for classifier in self.classifiers:
                 classifier.eval()
