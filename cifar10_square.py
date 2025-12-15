@@ -68,18 +68,9 @@ if __name__ == '__main__':
 
     loss_fn = nn.CrossEntropyLoss()
     if inference_only:
-        model.load_state_dict(torch.load(model_dir, map_location=device))
+        model.load_from_no_net(torch.load(model_dir, map_location=device))
         model.threshold = threshold
         print("Model loaded for inference only.")
-    elif linear_readout:
-        model.load_from_no_net(torch.load(model_dir, map_location=device))
-        accuracy_dict = model.train_output_layer(
-            tr_ds=tr_ds,
-            te_ds=te_ds,
-            epochs=100,
-            lr=1e-3,
-            device=device
-        )
     else:
         accuracy_dict = model.train_classifiers(
             train_ds=tr_ds,
@@ -87,6 +78,11 @@ if __name__ == '__main__':
             device=device,
             epochs=100,
             training_type='noise'
+        )
+
+    if linear_readout:
+        model.train_output_layer(
+            tr_ds, te_ds, epochs=10, lr=1e-3, device=device
         )
 
     # saved_weights = torch.load(model_dir, map_location=device)
