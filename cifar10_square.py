@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument('-s', action='store_true', default=False, help='Use similarity weighting if set')
     parser.add_argument('-ns', action='store_true', default=False, help='Do not use softmax if set')
     parser.add_argument('-g', action='store_true', default=False, help='Use graph-based read-out if set')
+    parser.add_argument('-l', action='store_true', default=False, help='Use linear-based read-out if set, overrides all else')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -37,6 +38,7 @@ if __name__ == '__main__':
     similarity_weighting = args.s
     no_softmax = args.ns
     graph_readout = args.g
+    linear_readout = args.l
     print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}, b: {binary_voting}, s: {similarity_weighting}, ns: {no_softmax}, g: {graph_readout}")
 
     home_dir = pathlib.Path.home()
@@ -53,7 +55,7 @@ if __name__ == '__main__':
         num_layers=3,
         binary_voting=binary_voting,
         bclass=CBS.SmallCNN,
-        net_out=False,
+        net_out=linear_readout,
         threshold=threshold,
         sim_weighted=similarity_weighting,
         no_soft=no_softmax,
@@ -92,6 +94,10 @@ if __name__ == '__main__':
     # no_net_model.load_state_dict(saved_weights)
     # model.load_from_no_net(no_net_model)
     # model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
+
+    if linear_readout:
+        model.load_state_dict(torch.load(model_dir, map_location=device))
+        model.train_output_layer(tr_ds, te_ds, epochs=10, lr=1e-3, device=device)
 
     model.eval()
     correct = 0

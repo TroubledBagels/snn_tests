@@ -438,11 +438,25 @@ class BSquareModel(nn.Module):
         vote_dict = {}
         votes = torch.zeros(B, self.num_classes, device=x.device)
         if self.net_out:
-            out_list = []
-            for classifier in self.classifiers:
-                classifier.eval()
-                out, _ = classifier(x)
-                out_list.append(out)
+            if not x.is_cuda:
+                out_list = []
+                for classifier in self.classifiers:
+                    classifier.eval()
+                    out, _ = classifier(x)
+                    out_list.append(nn.Softmax(out))
+            else:
+                stream_list = []
+                for classifier in self.classifiers:
+                    classifier.eval()
+                    stream = torch.cuda.Stream()
+                    stream_list.append(stream)
+                out_list = []
+                for idx, classifier in enumerate(self.classifiers):
+                    with torch.cuda.stream(stream_list[idx]):
+                        out, _ = classifier(x)
+                        out_list.append(nn.Softmax(out))
+                for stream in stream_list:
+                    stream.synchronize()
             out_tensor = torch.cat(out_list, dim=1)
             ann_out = self.out_layer(out_tensor)
             return ann_out

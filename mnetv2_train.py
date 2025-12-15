@@ -154,29 +154,29 @@ if __name__ == "__main__":
     # criterion = nn.CrossEntropyLoss()
     # optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    # for epoch in range(3):
-    #     # pbar = tqdm.tqdm(tr_dl)
-    #     # running_loss = 0.0
-    #     # for images, labels in pbar:
-    #     #     optimiser.zero_grad()
-    #     #     outputs = model(images)
-    #     #     loss = criterion(outputs, labels)
-    #     #     loss.backward()
-    #     #     optimiser.step()
-    #     #
-    #     #     running_loss += loss.item()
-    #     #     pbar.set_description(f"Epoch {epoch+1}, Loss: {running_loss / (pbar.n + 1):.4f}")
-    #
-    #     correct = 0
-    #     total = 0
-    #     qbar = tqdm.tqdm(te_dl)
-    #     with torch.no_grad():
-    #         for images, labels in qbar:
-    #             images, labels = images.to(device), labels.to(device)
-    #             outputs = model(images)
-    #             _, predicted = torch.max(outputs.data, 1)
-    #             total += labels.size(0)
-    #             correct += (predicted == labels).sum().item()
-    #             qbar.set_description(f"Epoch {epoch+1}, Test Accuracy: {100 * correct / total:.2f}%")
+    for epoch in range(3):
+        # pbar = tqdm.tqdm(tr_dl)
+        # running_loss = 0.0
+        # for images, labels in pbar:
+        #     optimiser.zero_grad()
+        #     outputs = model(images)
+        #     loss = criterion(outputs, labels)
+        #     loss.backward()
+        #     optimiser.step()
+        #
+        #     running_loss += loss.item()
+        #     pbar.set_description(f"Epoch {epoch+1}, Loss: {running_loss / (pbar.n + 1):.4f}")
+
+        correct = 0
+        total = 0
+        qbar = tqdm.tqdm(te_dl)
+        with torch.no_grad():
+            for images, labels in qbar:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                qbar.set_description(f"Epoch {epoch+1}, Test Accuracy: {100 * correct / total:.2f}%")
 
     print("Training complete.")
