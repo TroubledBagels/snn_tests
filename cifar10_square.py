@@ -19,7 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="CIFAR-10 B-Square Training and Evaluation")
     parser.add_argument('-m', type=str, default="./bsquares/cifar10_bal.pth", help='Path to the model directory')
     parser.add_argument('-t', type=float, default=0.0, help='Threshold for B-Square model')
-    parser.add_argument('-i', action='store_true', default=False, help='Run only inference if set')
+    parser.add_argument('-i', action='store_true', default=True, help='Run only inference if set')
     parser.add_argument('-b', action='store_true', default=False, help='Use binary voting if set')
     parser.add_argument('-s', action='store_true', default=False, help='Use similarity weighting if set')
     parser.add_argument('-ns', action='store_true', default=False, help='Do not use softmax if set')
@@ -68,9 +68,27 @@ if __name__ == '__main__':
 
     loss_fn = nn.CrossEntropyLoss()
     if inference_only:
-        model.load_from_no_net(torch.load(model_dir, map_location=device))
+        model.load_state_dict(torch.load(model_dir, map_location=device))
         model.threshold = threshold
         print("Model loaded for inference only.")
+    elif linear_readout:
+        temp_model = CBS.BSquareModel(
+            num_classes=10,
+            input_size=3,
+            hidden_size=16,
+            num_layers=3,
+            binary_voting=binary_voting,
+            bclass=CBS.SmallCNN,
+            net_out=False,
+            threshold=threshold,
+            sim_weighted=similarity_weighting,
+            no_soft=no_softmax,
+            graph_based=graph_readout
+        )
+        temp_model.to(device)
+        temp_model.load_state_dict(torch.load(model_dir, map_location=device))
+        model.load_from_no_net(temp_model)
+        print("Model backbone loaded for linear readout training.")
     else:
         accuracy_dict = model.train_classifiers(
             train_ds=tr_ds,
