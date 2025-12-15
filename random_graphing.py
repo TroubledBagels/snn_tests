@@ -7,7 +7,7 @@ current_known_bs_one = { # Example format: "Model Name": (accuracy, latency (ms)
     "MobileNetV2": (94.73, 164),
     "MobileNetV3": (92.97, 197),
     "WideResNet 28-10": (96.11, 81),
-    "SmallCNN Ensemble": (82.89, 653),
+    "SmallCNN Ensemble": (83.93, 653),
     "AlexNet": (90, 441),
     "LeNet": (80.86, 1520),
     "VGG19": (93.95, 261),
@@ -18,7 +18,7 @@ current_known_bs_one = { # Example format: "Model Name": (accuracy, latency (ms)
 
 current_known_bs_64 = {
     "MobileNetV2": (94.73, 152),
-    "SmallCNN Ensemble": (82.89, 228),
+    "SmallCNN Ensemble": (83.93, 228),
     "WideResNet 28-10": (96.11, 73),
     "MobileNetV3": (92.97, 148),
     "ResNet18": (95, 185),
@@ -32,7 +32,7 @@ current_known_bs_64 = {
 
 current_known_bs_64_list_ds = {
     "MobileNetV2": (94.73, 325),
-    "SmallCNN Ensemble": (82.89, 1170),
+    "SmallCNN Ensemble": (83.93, 1170),
     "WideResNet 28-10": (96.11, 95),
     "MobileNetV3": (92.97, 306),
     "ResNet18": (95, 504),
@@ -46,7 +46,7 @@ current_known_bs_64_list_ds = {
 
 current_known_bs_1_list_ds = {
     "MobileNetV2": (94.73, 355),
-    "SmallCNN Ensemble": (82.89, 1500),
+    "SmallCNN Ensemble": (83.93, 1500),
     "WideResNet 28-10": (96.11, 504),
     "MobileNetV3": (92.97, 374),
     "ResNet18": (95, 665),
@@ -60,7 +60,7 @@ current_known_bs_1_list_ds = {
 
 current_known_all = { # "Model Name": [acc, latency_bs1, latency_bs64, latency_bs1_list_ds, latency_bs64_list_ds]
     "MobileNetV2": [94.73, 164, 152, 355, 325],
-    "SmallCNN Ensemble": [82.89, 653, 228, 1500, 1170],
+    "SmallCNN Ensemble": [83.93, 653, 228, 1500, 1170],
     "WideResNet 28-10": [96.11, 81, 73, 504, 95],
     "MobileNetV3": [92.97, 197, 148, 374, 306],
     "ResNet18": [95, 52, 185, 665, 504],
