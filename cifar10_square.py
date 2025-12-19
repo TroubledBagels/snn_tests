@@ -55,8 +55,8 @@ if __name__ == '__main__':
 
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
-    te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=augmentation_transform, download=True)
-    tr_ds = torchvision.datasets.CIFAR10(root=save_dir, train=True, transform=test_transform, download=True)
+    te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=test_transform, download=True)
+    tr_ds = torchvision.datasets.CIFAR10(root=save_dir, train=True, transform=augmentation_transform, download=True)
     print(f"Train size: {len(tr_ds)}, Test size: {len(te_ds)}")
     print(tr_ds[0][0].shape)
 
