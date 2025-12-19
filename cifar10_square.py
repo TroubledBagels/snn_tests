@@ -83,7 +83,7 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(model_dir, map_location=device))
         model.threshold = threshold
         print("Model loaded for inference only.")
-    elif linear_readout:
+    elif linear_readout and inference_only:
         temp_model = CBS.BSquareModel(
             num_classes=10,
             input_size=3,
