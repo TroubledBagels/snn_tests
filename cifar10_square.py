@@ -108,7 +108,7 @@ if __name__ == '__main__':
             test_ds=te_ds,
             device=device,
             epochs=100,
-            training_type='noise'
+            training_type='all_class'
         )
 
     if linear_readout:
