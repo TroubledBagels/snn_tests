@@ -88,3 +88,4 @@ if __name__ == '__main__':
     output = model(sample_input)
     end = time.time()
     print(f"Inference time: {end - start} seconds")
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")

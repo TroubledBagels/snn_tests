@@ -41,10 +41,22 @@ if __name__ == '__main__':
     linear_readout = args.l
     print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}, b: {binary_voting}, s: {similarity_weighting}, ns: {no_softmax}, g: {graph_readout}")
 
+    augmentation_transform = torchvision.transforms.Compose([
+        torchvision.transforms.RandomHorizontalFlip(),
+        torchvision.transforms.RandomCrop(32, padding=4),
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+    ])
+
+    test_transform = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+    ])
+
     home_dir = pathlib.Path.home()
     save_dir = home_dir / "data" / "cifar10"
-    te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=transforms.ToTensor(), download=True)
-    tr_ds = torchvision.datasets.CIFAR10(root=save_dir, train=True, transform=transforms.ToTensor(), download=True)
+    te_ds = torchvision.datasets.CIFAR10(root=save_dir, train=False, transform=augmentation_transform, download=True)
+    tr_ds = torchvision.datasets.CIFAR10(root=save_dir, train=True, transform=test_transform, download=True)
     print(f"Train size: {len(tr_ds)}, Test size: {len(te_ds)}")
     print(tr_ds[0][0].shape)
 

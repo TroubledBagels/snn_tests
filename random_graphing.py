@@ -72,6 +72,30 @@ current_known_all = { # "Model Name": [acc, latency_bs1, latency_bs64, latency_b
     "GoogLeNet": [93.57, 92, 108, 197, 174]
 }
 
+acc_to_params = {
+    "MobileNetV2": (94.73, 2236682),
+    "MobileNetV3": (92.97, 261712),
+    "WideResNet 28-10": (96.11, 36481402),
+    "ResNet18": (95, 11173962),
+    "AlexNet": (90, 28714826),
+    "LeNet": (80.86, 657080),
+    "VGG19": (93.95, 38958922),
+    "VGG11": (92.39, 14728366),
+    "EfficientNetB0": (93.44, 4277382),
+    "GoogLeNet": (93.57, 2470842),
+    "SmallCNN Ensemble": (83.93, 2990970)
+}
+
+acc_to_MACs = {
+    "MobileNetV2": (94.73, 94557952),
+    "MobileNetV3": (92.97, 56025720),
+    "WideResNet 28-10": (96.11, 5253692288),
+    "ResNet18": (95, 557889024),
+    "AlexNet": (90, 205058048),
+    "VGG11": (92.39, 314308608),
+    "VGG19": (93.95, 418258944),
+}
+
 # plot the above as a labelled scatter plot
 
 plt.figure(figsize=(10, 6))
@@ -203,4 +227,22 @@ plt.legend(handles=shape_handles, title="Setting (marker)",
            bbox_to_anchor=(1.05, 0.45), loc='upper left')
 
 plt.tight_layout()
+plt.show()
+
+# Plot accuracy vs number of parameters
+plt.figure(figsize=(10, 6))
+for model_name, (accuracy, num_params) in acc_to_params.items():
+    plt.scatter(num_params, accuracy, label=model_name)
+    plt.text(num_params + 50000, accuracy - 0.2, model_name, fontsize=9)
+plt.xlabel('Number of Parameters')
+plt.ylabel('Accuracy (%)')
+plt.title('Model Accuracy vs Number of Parameters on CIFAR-10')
+plt.xlim(0, 40000000)
+plt.ylim(80, 100)
+# add line of best fit
+x = np.array([num_params for _, (_, num_params) in acc_to_params.items()])
+y = np.array([accuracy for _, (accuracy, _) in acc_to_params.items()])
+m, b = np.polyfit(x, y, 1)
+plt.plot(x, m*x + b, color='red', label='Line of Best Fit')
+plt.grid(True)
 plt.show()

@@ -869,3 +869,14 @@ if __name__ == "__main__":
     print(f"Tiny CNN output shape: {tiny_output.shape}, Time taken: {end_time_tiny - start_time_tiny:.6f} seconds")
     print(f"Medium CNN output shape: {med_output.shape}, Time taken: {end_time_medium - start_time_medium:.6f} seconds")
     print(f"Separable Medium CNN output shape: {sep_med_output.shape}, Time taken: {end_time_sep_medium - start_time_sep_medium:.6f} seconds")
+
+    full_reg_model = BSquareModel(
+        num_classes=10,
+        input_size=3,
+        hidden_size=32,
+        num_layers=2,
+        binary_voting=True,
+        bclass=SmallCNN
+    )
+
+    print(f"[FULL REGULAR] Number of parameters: {sum(p.numel() for p in full_reg_model.parameters() if p.requires_grad)}")
