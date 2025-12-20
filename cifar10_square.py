@@ -112,7 +112,7 @@ if __name__ == '__main__':
             num_layers=3,
             binary_voting=binary_voting,
             bclass=CBS.TinyCNN,
-            net_out=False
+            net_out=True
         )
         temp_model.to(device)
         temp_model.load_state_dict(torch.load(model_dir, map_location=device))
