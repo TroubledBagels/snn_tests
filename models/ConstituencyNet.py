@@ -66,7 +66,7 @@ class SmallConstituency(nn.Module):
         return weights, biases
 
 class ConstituencyNet(nn.Module):
-    def __init__(self, constituency_structures, out_type='rp', num_classes=1):
+    def __init__(self, constituency_structures, out_type='rp', num_classes=10):
         # out_type is 'rp' for ranked pairs, 'bin' for binary, 'ann' for ann, 'sum' for sum
         super(ConstituencyNet, self).__init__()
         self.num_constituencies = len(constituency_structures)
