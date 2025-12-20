@@ -4,9 +4,8 @@ import torch.nn as nn
 import tqdm
 
 class SmallConstituency(nn.Module):
-    def __init__(self, class_list, total_classes):
+    def __init__(self, class_list):
         super(SmallConstituency, self).__init__()
-        self.total_classes = total_classes
         self.class_list = class_list
         self.num_outputs = len(class_list)
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
@@ -41,9 +40,6 @@ class SmallConstituency(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
-        out_vec = torch.zeros(x.size(0), self.total_classes, device=x.device)
-        for i, class_idx in enumerate(self.class_list):
-            out_vec[:, class_idx] = x[:, i]
         return x
 
     def get_hidden_weights(self):
@@ -56,13 +52,12 @@ class ConstituencyNet(nn.Module):
         # out_type is 'rp' for ranked pairs, 'bin' for binary, 'ann' for ann, 'sum' for sum
         super(ConstituencyNet, self).__init__()
         self.num_constituencies = len(constituency_structures)
-        self.num_candidates = max(max(c) for c in constituency_structures) + 1
         self.rp = out_type == 'rp'
         self.bin = out_type == 'bin'
         self.ann = out_type == 'ann'
         self.sum = out_type == 'sum'
         for i in range(len(constituency_structures)):
-            setattr(self, f"constituency_{i}", SmallConstituency(constituency_structures[i], self.num_candidates))
+            setattr(self, f"constituency_{i}", SmallConstituency(constituency_structures[i]))
         self.classifiers = [getattr(self, f"constituency_{i}") for i in range(len(constituency_structures))]
 
     def forward(self, x):
