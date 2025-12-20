@@ -1,7 +1,25 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset
 
 import tqdm
+
+class ListDataset(Dataset):
+    def __init__(self, samples, transform=None):
+        """
+        samples: list of (events, label)
+        """
+        self.samples = samples
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        events, label = self.samples[idx]
+        if self.transform is not None:
+            events = self.transform(events)  # ToFrame applied per sample
+        return events, label
 
 class SmallConstituency(nn.Module):
     def __init__(self, class_list):
@@ -48,10 +66,11 @@ class SmallConstituency(nn.Module):
         return weights, biases
 
 class ConstituencyNet(nn.Module):
-    def __init__(self, constituency_structures, out_type='rp'):
+    def __init__(self, constituency_structures, out_type='rp', num_classes=1):
         # out_type is 'rp' for ranked pairs, 'bin' for binary, 'ann' for ann, 'sum' for sum
         super(ConstituencyNet, self).__init__()
         self.num_constituencies = len(constituency_structures)
+        self.num_classes = num_classes
         self.rp = out_type == 'rp'
         self.bin = out_type == 'bin'
         self.ann = out_type == 'ann'
@@ -90,8 +109,26 @@ class ConstituencyNet(nn.Module):
         criterion = nn.KLDivLoss(reduction='batchmean')
         optimisers = [torch.optim.Adam(classifier.parameters(), lr=lr) for classifier in self.classifiers]
 
-        tr_dl = torch.utils.data.DataLoader(tr_ds, batch_size=64, shuffle=True)
-        te_dl = torch.utils.data.DataLoader(te_ds, batch_size=64, shuffle=False)
+        tr_ds_dict = {}
+        tl_ds_dict = {}
+        for i in range(self.num_classes):
+            tr_ds_dict[i] = []
+            tl_ds_dict[i] = []
+        print("Separating training set by class...")
+        for i in range(len(tr_ds)):
+            data, label = tr_ds[i]
+            tr_ds_dict[label].append((data, label))
+            if (i + 1) % 100 == 0:
+                print(f"\rProcessed {i + 1}/{len(tr_ds)} training samples", end="")
+        print("")
+        print("Separating test set by class...")
+        for i in range(len(te_ds)):
+            data, label = te_ds[i]
+            tl_ds_dict[label].append((data, label))
+            if (i + 1) % 100 == 0:
+                print(f"\rProcessed {i + 1}/{len(te_ds)} test samples", end="")
+        print("")
+
 
         acc_dict = {}
         test_loss_dict = {}
@@ -104,8 +141,21 @@ class ConstituencyNet(nn.Module):
             best_model = None
 
             classifier.train()
+
+            important_classes = classifier.class_list
+            cl_tr_ds = []
+            cl_te_ds = []
+            for cls in important_classes:
+                cl_tr_ds.extend(tr_ds_dict[cls])
+                cl_te_ds.extend(tl_ds_dict[cls])
+            cl_tr_dataset = ListDataset(cl_tr_ds, transform=None)
+            cl_te_dataset = ListDataset(cl_te_ds, transform=None)
+
+            cl_tr_dl = torch.utils.data.DataLoader(cl_tr_dataset, batch_size=64, shuffle=True)
+            cl_te_dl = torch.utils.data.DataLoader(cl_te_dataset, batch_size=64, shuffle=False)
+
             for epoch in range(epochs):
-                pbar = tqdm.tqdm(tr_dl)
+                pbar = tqdm.tqdm(cl_tr_dl)
                 mean_loss = 0.0
                 for i, (data, target) in enumerate(pbar):
                     data = data.float()
@@ -130,7 +180,7 @@ class ConstituencyNet(nn.Module):
                     pbar.set_description(f"Epoch {epoch+1}/{epochs}, Loss: {mean_loss/(i+1):.4f}")
 
                 correct = 0
-                qbar = tqdm.tqdm(te_dl)
+                qbar = tqdm.tqdm(cl_te_dl)
                 for i, (data, target) in enumerate(qbar):
                     data = data.float()
                     data, target = data.to(device), target.to(device)
