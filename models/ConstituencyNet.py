@@ -201,11 +201,9 @@ class ConstituencyNet(nn.Module):
                     with torch.no_grad():
                         output = classifier(data)
                         pred = output.argmax(dim=1, keepdim=True)
-                        for j, t in enumerate(target):
-                            if t.item() in classifier.class_list:
-                                class_idx = classifier.class_list.index(t.item())
-                                if pred[j].item() == class_idx:
-                                    correct += 1
+                        correct += pred.eq(target.view_as(pred)).sum().item()
+                    acc = correct / len(cl_te_ds)
+                    qbar.set_description(f"Test Accuracy: {acc*100:.2f}%")
                 acc = correct / len(te_ds)
                 print(f"Classifier {idx} Test Accuracy: {acc*100:.2f}%")
                 if acc > cur_best_acc:

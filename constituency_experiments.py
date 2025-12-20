@@ -89,5 +89,7 @@ if __name__ == "__main__":
             qbar.set_description(f"Test Accuracy: {100 * correct / total:.2f}%")
 
         print(f"Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+        print(f"Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
+        print(f"Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
 
     print("Training complete.")
