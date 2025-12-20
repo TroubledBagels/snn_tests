@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument('-ns', action='store_true', default=False, help='Do not use softmax if set')
     parser.add_argument('-g', action='store_true', default=False, help='Use graph-based read-out if set')
     parser.add_argument('-l', action='store_true', default=False, help='Use linear-based read-out if set, overrides all else')
+    parser.add_argument('-ln', action='store_true', default=False, help='Load from net model without readout layer')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -39,6 +40,7 @@ if __name__ == '__main__':
     no_softmax = args.ns
     graph_readout = args.g
     linear_readout = args.l
+    load_no_net = args.ln
     print(f"Parameters: m: {model_dir}, t: {threshold}, i: {inference_only}, b: {binary_voting}, s: {similarity_weighting}, ns: {no_softmax}, g: {graph_readout}")
 
     augmentation_transform = torchvision.transforms.Compose([
@@ -79,7 +81,7 @@ if __name__ == '__main__':
     print(model)
 
     loss_fn = nn.CrossEntropyLoss()
-    if inference_only and not linear_readout:
+    if inference_only and not linear_readout and not load_no_net:
         model.load_state_dict(torch.load(model_dir, map_location=device))
         model.threshold = threshold
         print("Model loaded for inference only.")
@@ -102,6 +104,20 @@ if __name__ == '__main__':
         print(temp_model)
         model.load_from_no_net(temp_model)
         print("Model backbone loaded for linear readout training.")
+    elif inference_only and load_no_net:
+        temp_model = CBS.BSquareModel(
+            num_classes=10,
+            input_size=3,
+            hidden_size=16,
+            num_layers=3,
+            binary_voting=binary_voting,
+            bclass=CBS.TinyCNN,
+            net_out=False
+        )
+        temp_model.to(device)
+        temp_model.load_state_dict(torch.load(model_dir, map_location=device))
+        model.load_from_no_net(temp_model)
+        print("Model loaded from no-net model for inference only.")
     else:
         accuracy_dict = model.train_classifiers(
             train_ds=tr_ds,
