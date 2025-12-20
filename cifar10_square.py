@@ -111,7 +111,7 @@ if __name__ == '__main__':
             hidden_size=16,
             num_layers=3,
             binary_voting=binary_voting,
-            bclass=CBS.TinyCNN,
+            bclass=CBS.SmallCNN,
             net_out=True
         )
         temp_model.to(device)
