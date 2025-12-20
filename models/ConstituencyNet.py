@@ -4,8 +4,9 @@ import torch.nn as nn
 import tqdm
 
 class SmallConstituency(nn.Module):
-    def __init__(self, class_list):
+    def __init__(self, class_list, total_classes):
         super(SmallConstituency, self).__init__()
+        self.total_classes = total_classes
         self.class_list = class_list
         self.num_outputs = len(class_list)
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
@@ -40,6 +41,9 @@ class SmallConstituency(nn.Module):
         x = self.gap(x)
         x = nn.Flatten()(x)
         x = self.fc1(x)
+        out_vec = torch.zeros(x.size(0), self.total_classes, device=x.device)
+        for i, class_idx in enumerate(self.class_list):
+            out_vec[:, class_idx] = x[:, i]
         return x
 
     def get_hidden_weights(self):
@@ -52,12 +56,13 @@ class ConstituencyNet(nn.Module):
         # out_type is 'rp' for ranked pairs, 'bin' for binary, 'ann' for ann, 'sum' for sum
         super(ConstituencyNet, self).__init__()
         self.num_constituencies = len(constituency_structures)
+        self.num_candidates = max(max(c) for c in constituency_structures) + 1
         self.rp = out_type == 'rp'
         self.bin = out_type == 'bin'
         self.ann = out_type == 'ann'
         self.sum = out_type == 'sum'
         for i in range(len(constituency_structures)):
-            setattr(self, f"constituency_{i}", SmallConstituency(constituency_structures[i]))
+            setattr(self, f"constituency_{i}", SmallConstituency(constituency_structures[i], self.num_candidates))
         self.classifiers = [getattr(self, f"constituency_{i}") for i in range(len(constituency_structures))]
 
     def forward(self, x):
@@ -101,6 +106,7 @@ class ConstituencyNet(nn.Module):
 
             cur_best_acc = 0.0
             best_loss = float('inf')
+            best_model = None
 
             classifier.train()
             for epoch in range(epochs):
@@ -121,12 +127,34 @@ class ConstituencyNet(nn.Module):
 
                     optimisers[idx].zero_grad()
                     output = classifier(data)
-                    log_output = torch.LogSoftmax(dim=1)(output)
+                    log_output = nn.LogSoftmax(dim=1)(output)
                     loss = criterion(log_output, target_binary)
                     loss.backward()
                     mean_loss += loss.item()
                     optimisers[idx].step()
                     pbar.set_description(f"Epoch {epoch+1}/{epochs}, Loss: {mean_loss/(i+1):.4f}")
+
+                correct = 0
+                qbar = tqdm.tqdm(te_dl)
+                for i, (data, target) in enumerate(qbar):
+                    data = data.float()
+                    data, target = data.to(device), target.to(device)
+                    with torch.no_grad():
+                        output = classifier(data)
+                        pred = output.argmax(dim=1, keepdim=True)
+                        for j, t in enumerate(target):
+                            if t.item() in classifier.class_list:
+                                class_idx = classifier.class_list.index(t.item())
+                                if pred[j].item() == class_idx:
+                                    correct += 1
+                acc = correct / len(te_ds)
+                print(f"Classifier {idx} Test Accuracy: {acc*100:.2f}%")
+                if acc > cur_best_acc:
+                    cur_best_acc = acc
+                    best_model = classifier.state_dict()
+            classifier.load_state_dict(best_model)
+            acc_dict[f"classifier_{idx}_accuracy"] = cur_best_acc
+        return acc_dict
 
 
 if __name__ == "__main__":

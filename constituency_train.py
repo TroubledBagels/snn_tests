@@ -44,5 +44,5 @@ if __name__ == '__main__':
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     print(model)
 
-    model.train_classifiers(tr_ds, te_ds, epochs=5, lr=1e-3, device=device)
+    model.train_classifiers(tr_ds, te_ds, epochs=100, lr=1e-3, device=device)
     torch.save(model.state_dict(), "constituency_net_cifar10.pth")
