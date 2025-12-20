@@ -106,7 +106,8 @@ class ConstituencyNet(nn.Module):
 
     def train_classifiers(self, tr_ds, te_ds, epochs=3, lr=1e-3, device='cpu'):
         print("Training ConstituencyNet Classifiers")
-        criterion = nn.KLDivLoss(reduction='batchmean')
+        # criterion = nn.KLDivLoss(reduction='batchmean')
+        criterion = nn.CrossEntropyLoss()
         optimisers = [torch.optim.Adam(classifier.parameters(), lr=lr) for classifier in self.classifiers]
 
         tr_ds_dict = {}
@@ -148,6 +149,18 @@ class ConstituencyNet(nn.Module):
             for cls in important_classes:
                 cl_tr_ds.extend(tr_ds_dict[cls])
                 cl_te_ds.extend(tl_ds_dict[cls])
+
+            cl_tr_ds_relative = []
+
+            for i, (data, label) in enumerate(cl_tr_ds):
+                cl_tr_ds_relative.append((data, important_classes.index(label)))
+            cl_tr_ds = cl_tr_ds_relative
+
+            cl_te_ds_relative = []
+            for i, (data, label) in enumerate(cl_te_ds):
+                cl_te_ds_relative.append((data, important_classes.index(label)))
+            cl_te_ds = cl_te_ds_relative
+
             cl_tr_dataset = ListDataset(cl_tr_ds, transform=None)
             cl_te_dataset = ListDataset(cl_te_ds, transform=None)
 
@@ -163,17 +176,18 @@ class ConstituencyNet(nn.Module):
 
                     # Create 1-hot encoding for target if it is in classifer.class_list
                     # If not, set softmax target to all zeros
-                    target_binary = torch.zeros(len(target), classifier.num_outputs, device=device)
-                    for j, t in enumerate(target):
-                        if t.item() in classifier.class_list:
-                            class_idx = classifier.class_list.index(t.item())
-                            target_binary[j][class_idx] = 1.0
-                    target_binary = target_binary / target_binary.sum(dim=1, keepdim=True).clamp(min=1e-6)
+                    # target_binary = torch.zeros(len(target), classifier.num_outputs, device=device)
+                    # for j, t in enumerate(target):
+                    #     if t.item() in classifier.class_list:
+                    #         class_idx = classifier.class_list.index(t.item())
+                    #         target_binary[j][class_idx] = 1.0
+                    # target_binary = target_binary / target_binary.sum(dim=1, keepdim=True).clamp(min=1e-6)
 
                     optimisers[idx].zero_grad()
                     output = classifier(data)
-                    log_output = nn.LogSoftmax(dim=1)(output)
-                    loss = criterion(log_output, target_binary)
+                    # log_output = nn.LogSoftmax(dim=1)(output)
+                    # loss = criterion(log_output, target_binary)
+                    loss = criterion(output, target)
                     loss.backward()
                     mean_loss += loss.item()
                     optimisers[idx].step()
