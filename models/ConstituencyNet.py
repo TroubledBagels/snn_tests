@@ -204,7 +204,7 @@ class ConstituencyNet(nn.Module):
                         correct += pred.eq(target.view_as(pred)).sum().item()
                     acc = correct / len(cl_te_ds)
                     qbar.set_description(f"Test Accuracy: {acc*100:.2f}%")
-                acc = correct / len(te_ds)
+                acc = correct / len(cl_te_ds)
                 print(f"Classifier {idx} Test Accuracy: {acc*100:.2f}%")
                 if acc > cur_best_acc:
                     cur_best_acc = acc
