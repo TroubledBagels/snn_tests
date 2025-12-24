@@ -110,109 +110,58 @@ class ConstituencyNet(nn.Module):
         criterion = nn.CrossEntropyLoss()
         optimisers = [torch.optim.Adam(classifier.parameters(), lr=lr) for classifier in self.classifiers]
 
-        tr_ds_dict = {}
-        tl_ds_dict = {}
-        for i in range(self.num_classes):
-            tr_ds_dict[i] = []
-            tl_ds_dict[i] = []
-        print("Separating training set by class...")
-        for i in range(len(tr_ds)):
-            data, label = tr_ds[i]
-            tr_ds_dict[label].append((data, label))
-            if (i + 1) % 100 == 0:
-                print(f"\rProcessed {i + 1}/{len(tr_ds)} training samples", end="")
-        print("")
-        print("Separating test set by class...")
-        for i in range(len(te_ds)):
-            data, label = te_ds[i]
-            tl_ds_dict[label].append((data, label))
-            if (i + 1) % 100 == 0:
-                print(f"\rProcessed {i + 1}/{len(te_ds)} test samples", end="")
-        print("")
-
-
-        acc_dict = {}
-        test_loss_dict = {}
-        for idx, classifier in enumerate(self.classifiers):
-            print(f"Training Classifier {idx+1}/{self.num_constituencies} with {len(classifier.class_list)} classes")
+        for i, classifier in enumerate(self.classifiers):
             classifier.to(device)
-
-            cur_best_acc = 0.0
-            best_loss = float('inf')
-            best_model = None
-
             classifier.train()
 
-            important_classes = classifier.class_list
-            cl_tr_ds = []
-            cl_te_ds = []
-            for cls in important_classes:
-                cl_tr_ds.extend(tr_ds_dict[cls])
-                cl_te_ds.extend(tl_ds_dict[cls])
+            train_ds_cl = []
+            test_ds_cl = []
+            for data, label in tr_ds:
+                if label in classifier.class_list:
+                    train_ds_cl.append((data, classifier.class_list.index(label)))
+            for data, label in te_ds:
+                if label in classifier.class_list:
+                    test_ds_cl.append((data, classifier.class_list.index(label)))
 
-            cl_tr_ds_relative = []
+            tr_dataset = ListDataset(train_ds_cl)
+            te_dataset = ListDataset(test_ds_cl)
 
-            for i, (data, label) in enumerate(cl_tr_ds):
-                cl_tr_ds_relative.append((data, important_classes.index(label)))
-            cl_tr_ds = cl_tr_ds_relative
-
-            cl_te_ds_relative = []
-            for i, (data, label) in enumerate(cl_te_ds):
-                cl_te_ds_relative.append((data, important_classes.index(label)))
-            cl_te_ds = cl_te_ds_relative
-
-            cl_tr_dataset = ListDataset(cl_tr_ds, transform=None)
-            cl_te_dataset = ListDataset(cl_te_ds, transform=None)
-
-            cl_tr_dl = torch.utils.data.DataLoader(cl_tr_dataset, batch_size=64, shuffle=True)
-            cl_te_dl = torch.utils.data.DataLoader(cl_te_dataset, batch_size=64, shuffle=False)
+            tr_dl = torch.utils.data.DataLoader(tr_dataset, batch_size=64, shuffle=True)
+            te_dl = torch.utils.data.DataLoader(te_dataset, batch_size=64, shuffle=False)
 
             for epoch in range(epochs):
-                pbar = tqdm.tqdm(cl_tr_dl)
+                pbar = tqdm.tqdm(tr_dl)
                 mean_loss = 0.0
-                for i, (data, target) in enumerate(pbar):
-                    data = data.float()
-                    data, target = data.to(device), target.to(device)
-
-                    # Create 1-hot encoding for target if it is in classifer.class_list
-                    # If not, set softmax target to all zeros
-                    # target_binary = torch.zeros(len(target), classifier.num_outputs, device=device)
-                    # for j, t in enumerate(target):
-                    #     if t.item() in classifier.class_list:
-                    #         class_idx = classifier.class_list.index(t.item())
-                    #         target_binary[j][class_idx] = 1.0
-                    # target_binary = target_binary / target_binary.sum(dim=1, keepdim=True).clamp(min=1e-6)
-
-                    optimisers[idx].zero_grad()
-                    output = classifier(data)
-                    # log_output = nn.LogSoftmax(dim=1)(output)
-                    # loss = criterion(log_output, target_binary)
-                    loss = criterion(output, target)
-                    loss.backward()
+                for j, (data, labels) in enumerate(pbar):
+                    data, labels = data.to(device), labels.to(device)
+                    optimisers[i].zero_grad()
+                    outputs = classifier(data)
+                    loss = criterion(outputs, labels)
                     mean_loss += loss.item()
-                    optimisers[idx].step()
-                    pbar.set_description(f"Epoch {epoch+1}/{epochs}, Loss: {mean_loss/(i+1):.4f}")
+                    loss.backward()
+                    optimisers[i].step()
+                    classifier.zero_grad()
+                    pbar.set_description(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Loss: {mean_loss/(j+1):.4f}")
 
+                qbar = tqdm.tqdm(te_dl)
                 correct = 0
-                qbar = tqdm.tqdm(cl_te_dl)
-                for i, (data, target) in enumerate(qbar):
-                    data = data.float()
-                    data, target = data.to(device), target.to(device)
-                    with torch.no_grad():
-                        output = classifier(data)
-                        pred = output.argmax(dim=1, keepdim=True)
-                        correct += pred.eq(target.view_as(pred)).sum().item()
-                    acc = correct / len(cl_te_ds)
-                    qbar.set_description(f"Test Accuracy: {acc*100:.2f}%")
-                acc = correct / len(cl_te_ds)
-                print(f"Classifier {idx} Test Accuracy: {acc*100:.2f}%")
-                if acc > cur_best_acc:
-                    cur_best_acc = acc
-                    best_model = classifier.state_dict()
-            classifier.load_state_dict(best_model)
-            acc_dict[f"classifier_{idx}_accuracy"] = cur_best_acc
-        return acc_dict
-
+                total = 0
+                top2 = 0
+                top3 = 0
+                for j, (data, labels) in enumerate(qbar):
+                    data, labels = data.to(device), labels.to(device)
+                    outputs = classifier(data)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
+                    top2 += (labels.unsqueeze(1) == torch.topk(outputs, 2, dim=1).indices).any(dim=1).sum().item()
+                    top3 += (labels.unsqueeze(1) == torch.topk(outputs, 3, dim=1).indices).any(dim=1).sum().item()
+                    qbar.set_description(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+                print(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+                print(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
+                print(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
+            classifier.to('cpu')
+        print("Training complete.")
 
 if __name__ == "__main__":
     model = ConstituencyNet([[0, 1, 2, 3, 4]])
