@@ -3,10 +3,30 @@ import torch.nn as nn
 import torchvision
 from torchvision import transforms
 import pathlib
+import tqdm
 
 import models.ConstituencyNet as CN
 
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train ConstituencyNet on CIFAR-10")
+    parser.add_argument('-e', type=int, default=100, help='Number of training epochs')
+    parser.add_argument('-lr', type=float, default=1e-3, help='Learning rate')
+    parser.add_argument('-bs', type=int, default=64, help='Batch size for training')
+    parser.add_argument('-i', action='store_true', default=False, help='Run inference only if set')
+    parser.add_argument('-m', type=str, default="", help='Path to load model from for inference only and save model to')
+    return parser.parse_args()
+
 if __name__ == '__main__':
+    torch.manual_seed(42)
+    args = parse_args()
+    epochs = args.e
+    lr = args.lr
+    batch_size = args.bs
+    inference_only = args.i
+    model_path = args.m
+    print(f"Parameters: epochs: {epochs}, lr: {lr}, batch_size: {batch_size}, inference_only: {inference_only}")
     augmentation_transform = torchvision.transforms.Compose([
         torchvision.transforms.RandomHorizontalFlip(),
         torchvision.transforms.RandomCrop(32, padding=4),
@@ -44,5 +64,31 @@ if __name__ == '__main__':
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
     print(model)
 
-    model.train_classifiers(tr_ds, te_ds, epochs=100, lr=1e-3, device=device)
-    torch.save(model.state_dict(), "constituency_net_cifar10.pth")
+    if not inference_only:
+        model.train_classifiers(tr_ds, te_ds, epochs=100, lr=1e-3, device=device)
+    else:
+        if model_path != "":
+            model.load_state_dict(torch.load(model_path, map_location=device))
+            print(f"Loaded model from {model_path}")
+        else:
+            print("Model path not provided for inference only mode. Exiting.")
+            exit(1)
+
+    te_dl = torch.utils.data.DataLoader(te_ds, batch_size=batch_size, shuffle=False)
+
+    correct = 0
+    model.eval()
+    top2 = 0
+    top3 = 0
+    pbar = tqdm.tqdm(te_dl)
+    for i, (data, labels) in enumerate(pbar):
+        data, labels = data.to(device), labels.to(device)
+        outputs = model(data)
+        _, predicted = torch.max(outputs.data, 1)
+        correct += (predicted == labels).sum().item()
+        top2 += (labels.unsqueeze(1) == torch.topk(outputs, 2, dim=1).indices).any(dim=1).sum().item()
+        top3 += (labels.unsqueeze(1) == torch.topk(outputs, 3, dim=1).indices).any(dim=1).sum().item()
+        pbar.set_description(f"Accuracy: {100 * correct / len(te_ds):.2f}%")
+    print(f"Final Test Accuracy: {100 * correct / len(te_ds):.2f}%")
+
+    torch.save(model.state_dict(), model_path)

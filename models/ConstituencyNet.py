@@ -66,7 +66,7 @@ class SmallConstituency(nn.Module):
         return weights, biases
 
 class ConstituencyNet(nn.Module):
-    def __init__(self, constituency_structures, out_type='rp', num_classes=10):
+    def __init__(self, constituency_structures, out_type='sum', num_classes=10):
         # out_type is 'rp' for ranked pairs, 'bin' for binary, 'ann' for ann, 'sum' for sum
         super(ConstituencyNet, self).__init__()
         self.num_constituencies = len(constituency_structures)
@@ -99,9 +99,12 @@ class ConstituencyNet(nn.Module):
                     out_list.append(nn.Softmax(dim=1)(out))
             torch.cuda.synchronize()
 
-        final_out = torch.zeros_like(out_list[0])
-        for out in out_list:
-            final_out += out
+        if self.sum:
+            final_out = torch.zeros(x.size(0), self.num_classes).to(x.device)
+            for i, classifier in enumerate(self.classifiers):
+                for j, class_idx in enumerate(classifier.class_list):
+                    final_out[:, class_idx] += out_list[i][:, j]
+
         return final_out
 
     def train_classifiers(self, tr_ds, te_ds, epochs=3, lr=1e-3, device='cpu'):
