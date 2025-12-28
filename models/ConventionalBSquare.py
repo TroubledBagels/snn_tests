@@ -682,6 +682,8 @@ class BSquareModel(nn.Module):
                 if no_net_classifier is not None:
                     print(f"Loading weights for classes {classifier.c_1} and {classifier.c_2}...")
                     classifier.load_state_dict(no_net_classifier.state_dict())
+                    for param in classifier.parameters():
+                        param.requires_grad = False
             print("Loaded weights from no-net model.")
 
 

@@ -244,6 +244,8 @@ class ConstituencyNet(nn.Module):
             for i, classifier in enumerate(self.classifiers):
                 no_net_classifers = no_net_model.classifiers
                 classifier.load_state_dict(no_net_classifers[i].state_dict())
+                for param in classifier.parameters():
+                    param.requires_grad = False
             print("Loaded weights from no-net model.")
 
 if __name__ == "__main__":
