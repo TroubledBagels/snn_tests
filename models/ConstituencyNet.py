@@ -132,6 +132,9 @@ class ConstituencyNet(nn.Module):
         elif self.ann:
             # Concatenate all classifier outputs
             concat_out = torch.cat(out_list, dim=1)
+            # Creates B x 50 tensor if 10 constituencies with 5 outputs each
+            concat_out = concat_out - concat_out.mean(dim=1, keepdim=True)
+            concat_out = concat_out / (concat_out.std(dim=1, keepdim=True) + 1e-6)
             final_out = self.ann_layer(concat_out)
 
         return final_out
