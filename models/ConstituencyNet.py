@@ -104,6 +104,18 @@ class ConstituencyNet(nn.Module):
             for i, classifier in enumerate(self.classifiers):
                 for j, class_idx in enumerate(classifier.class_list):
                     final_out[:, class_idx] += out_list[i][:, j]
+        elif self.rp:
+            # Build pairwise comparison matrix
+            final_out = torch.zeros(x.size(0), self.num_classes, self.num_classes).to(x.device)
+            for i, classifier in enumerate(self.classifiers):
+                for j, class_idx in enumerate(classifier.class_list):
+                    for k, other_class_idx in enumerate(classifier.class_list):
+                        if j != k:
+                            final_out[:, class_idx, other_class_idx] += out_list[i][:, j]
+            print(final_out)
+            # Count wins
+            final_out = torch.sum(final_out > (len(self.classifiers) / 2), dim=2)
+            print(final_out)
 
         return final_out
 
@@ -167,7 +179,19 @@ class ConstituencyNet(nn.Module):
         print("Training complete.")
 
 if __name__ == "__main__":
-    model = ConstituencyNet([[0, 1, 2, 3, 4]])
+    constituencies = [
+        [0, 1, 6, 7, 8],
+        [0, 1, 2, 5, 9],
+        [1, 2, 3, 4, 8],
+        [1, 3, 6, 8, 9],
+        [0, 1, 4, 5, 9],
+        [1, 2, 4, 5, 8],
+        [1, 3, 6, 7, 8],
+        [0, 1, 5, 6, 7],
+        [1, 2, 6, 7, 8],
+        [2, 3, 4, 8, 9]
+    ]
+    model = ConstituencyNet([constituencies], out_type='rp', num_classes=10)
     input = torch.randn(1, 3, 32, 32)
     output = model(input)
     print(output.shape)
