@@ -110,8 +110,10 @@ class ConstituencyNet(nn.Module):
             for i, classifier in enumerate(self.classifiers):
                 for j, class_idx in enumerate(classifier.class_list):
                     for k, other_class_idx in enumerate(classifier.class_list):
-                        if j != k:
+                        if j > k:
                             final_out[:, class_idx, other_class_idx] += out_list[i][:, j]
+                        elif j < k:
+                            final_out[:, class_idx, other_class_idx] -= out_list[i][:, j]
             # Count wins
             final_out = torch.sum(final_out > (len(self.classifiers) / 2), dim=2)
 
