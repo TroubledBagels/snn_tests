@@ -205,9 +205,9 @@ class ConstituencyNet(nn.Module):
         te_dl = torch.utils.data.DataLoader(te_ds, batch_size=64, shuffle=False)
 
         self.ann_layer.to(device)
-        self.ann_layer.train()
 
         for epoch in range(epochs):
+            self.ann_layer.train()
             pbar = tqdm.tqdm(tr_dl)
             mean_loss = 0.0
             for j, (data, labels) in enumerate(pbar):
@@ -217,27 +217,34 @@ class ConstituencyNet(nn.Module):
                 loss = criterion(outputs, labels)
                 mean_loss += loss.item()
                 loss.backward()
+                total = 0.0
+                for p in self.ann_layer.parameters():
+                    if p.grad is not None:
+                        total += p.grad.abs().sum().item()
+                print("grad_sum:", total)
                 optimiser.step()
                 # self.ann_layer.zero_grad()
                 pbar.set_description(f"ANN Epoch {epoch+1} Loss: {mean_loss/(j+1):.4f}")
 
-            qbar = tqdm.tqdm(te_dl)
-            correct = 0
-            total = 0
-            top2 = 0
-            top3 = 0
-            for j, (data, labels) in enumerate(qbar):
-                data, labels = data.to(device), labels.to(device)
-                outputs = self.forward(data)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-                top2 += (labels.unsqueeze(1) == torch.topk(outputs, 2, dim=1).indices).any(dim=1).sum().item()
-                top3 += (labels.unsqueeze(1) == torch.topk(outputs, 3, dim=1).indices).any(dim=1).sum().item()
-                qbar.set_description(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
-            print(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
-            print(f"ANN Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
-            print(f"ANN Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
+            self.ann_layer.eval()
+            with torch.no_grad():
+                qbar = tqdm.tqdm(te_dl)
+                correct = 0
+                total = 0
+                top2 = 0
+                top3 = 0
+                for j, (data, labels) in enumerate(qbar):
+                    data, labels = data.to(device), labels.to(device)
+                    outputs = self.forward(data)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
+                    top2 += (labels.unsqueeze(1) == torch.topk(outputs, 2, dim=1).indices).any(dim=1).sum().item()
+                    top3 += (labels.unsqueeze(1) == torch.topk(outputs, 3, dim=1).indices).any(dim=1).sum().item()
+                    qbar.set_description(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+                print(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+                print(f"ANN Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
+                print(f"ANN Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
 
     def load_from_no_net(self, no_net_model):
         with torch.no_grad():
