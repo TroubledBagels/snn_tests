@@ -83,6 +83,7 @@ class ConstituencyNet(nn.Module):
             total_num_outputs = 0
             for classifier in self.classifiers:
                 total_num_outputs += classifier.num_outputs
+            print("Total number of outputs to ANN layer:", total_num_outputs)
             self.ann_layer = nn.Linear(total_num_outputs, self.num_classes)
 
     def forward(self, x):
@@ -103,7 +104,8 @@ class ConstituencyNet(nn.Module):
                 with torch.cuda.stream(stream_list[i]):
                     out = classifier(x)
                     if self.ann:
-                        out_list[i] = out
+                        # out_list[i] = out
+                        out_list[i] = nn.Softmax(dim=1)(out)
                     else:
                         out_list[i] = nn.Softmax(dim=1)(out)
             torch.cuda.synchronize()
@@ -133,8 +135,8 @@ class ConstituencyNet(nn.Module):
             # Concatenate all classifier outputs
             concat_out = torch.cat(out_list, dim=1)
             # Creates B x 50 tensor if 10 constituencies with 5 outputs each
-            concat_out = concat_out - concat_out.mean(dim=1, keepdim=True)
-            concat_out = concat_out / (concat_out.std(dim=1, keepdim=True) + 1e-6)
+            # concat_out = concat_out - concat_out.mean(dim=1, keepdim=True)
+            # concat_out = concat_out / (concat_out.std(dim=1, keepdim=True) + 1e-6)
             final_out = self.ann_layer(concat_out)
 
         return final_out
@@ -269,9 +271,32 @@ if __name__ == "__main__":
         [1, 2, 6, 7, 8],
         [2, 3, 4, 8, 9]
     ]
-    model = ConstituencyNet([constituencies], out_type='ann', num_classes=10)
+
+    constituencies_sequential = []
+    for i in range(10):
+        constituencies_sequential += constituencies[i]
+    print(f"constituencies_sequential: {constituencies_sequential}")
+
+    # Create a vector for a linear layer weight that simply sums the outputs of all constituencies into a 10-dimensional output based on their assigned classes
+    weight_vector = torch.zeros(10, 50)
+    for i in range(10):
+        for j in range(len(constituencies_sequential)):
+            if constituencies_sequential[j] == i:
+                weight_vector[i, j] = 1.0
+    print(f"Weight vector sum: {weight_vector.sum()}")
+
+    model = ConstituencyNet(constituencies, out_type='ann', num_classes=10)
+    model.ann_layer.weight = nn.Parameter(weight_vector)
+    model.ann_layer.bias = nn.Parameter(torch.zeros(10))
+    model_sum = ConstituencyNet(constituencies, out_type='sum', num_classes=10)
     input = torch.randn(1, 3, 32, 32)
-    output = model(input)
+    output_ann = model(input)
+    output_sum = model_sum(input)
+    print(f"Output from ANN with summation weights: {output_ann}")
+    print(f"Output from SUM model: {output_sum}")
+    print("Output difference between ANN with summation weights and SUM model:")
+    output = output_ann - output_sum
+    print(model.ann_layer.weight.shape)
     print(output)
     print(output.shape)
     print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")

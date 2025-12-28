@@ -60,6 +60,19 @@ if __name__ == '__main__':
         [2, 3, 4, 8, 9]
     ]
 
+    constituencies_sequential = []
+    for i in range(10):
+        constituencies_sequential += constituencies[i]
+    print(f"constituencies_sequential: {constituencies_sequential}")
+
+    # Create a vector for a linear layer weight that simply sums the outputs of all constituencies into a 10-dimensional output based on their assigned classes
+    weight_vector = torch.zeros(10, 50)
+    for i in range(10):
+        for j in range(len(constituencies_sequential)):
+            if constituencies_sequential[j] == i:
+                weight_vector[i, j] = 1.0
+    print(f"Weight vector sum: {weight_vector.sum()}")
+
     model = CN.ConstituencyNet(
         constituencies,
         out_type=out_type,
@@ -89,7 +102,10 @@ if __name__ == '__main__':
             temp_model = CN.ConstituencyNet(
                 constituencies
             )
+            temp_model.load_state_dict(torch.load(model_path, map_location=device))
             model.load_from_no_net(temp_model)
+            # model.ann_layer.weight = nn.Parameter(weight_vector)
+            # model.ann_layer.bias = nn.Parameter(torch.zeros(10))
             model.train_ann(tr_ds, te_ds, epochs=epochs, lr=lr,
                             device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
