@@ -66,12 +66,6 @@ if __name__ == '__main__':
         num_classes=10
     )
 
-    if out_type == "ann":
-        temp_model = CN.ConstituencyNet(
-            constituencies
-        )
-        model.load_from_no_net(temp_model)
-        model.train_ann(tr_ds, te_ds, epochs=epochs, lr=lr, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -79,14 +73,25 @@ if __name__ == '__main__':
     print(model)
 
     if not inference_only:
+        if out_type == "ann":
+            print(f"Please train a non-ANN model first before training ANN output type. Exiting.")
+            exit(1)
         model.train_classifiers(tr_ds, te_ds, epochs=100, lr=1e-3, device=device)
     else:
-        if model_path != "":
-            model.load_state_dict(torch.load(model_path, map_location=device))
-            print(f"Loaded model from {model_path}")
+        if not out_type == "ann":
+            if model_path != "":
+                model.load_state_dict(torch.load(model_path, map_location=device))
+                print(f"Loaded model from {model_path}")
+            else:
+                print("Model path not provided for inference only mode. Exiting.")
+                exit(1)
         else:
-            print("Model path not provided for inference only mode. Exiting.")
-            exit(1)
+            temp_model = CN.ConstituencyNet(
+                constituencies
+            )
+            model.load_from_no_net(temp_model)
+            model.train_ann(tr_ds, te_ds, epochs=epochs, lr=lr,
+                            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
     te_dl = torch.utils.data.DataLoader(te_ds, batch_size=batch_size, shuffle=False)
 
