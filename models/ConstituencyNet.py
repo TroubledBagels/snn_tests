@@ -220,11 +220,6 @@ class ConstituencyNet(nn.Module):
                 loss = criterion(outputs, labels)
                 mean_loss += loss.item()
                 loss.backward()
-                total = 0.0
-                for p in self.ann_layer.parameters():
-                    if p.grad is not None:
-                        total += p.grad.abs().sum().item()
-                print("grad_sum:", total)
                 optimiser.step()
                 # self.ann_layer.zero_grad()
                 pbar.set_description(f"ANN Epoch {epoch+1} Loss: {mean_loss/(j+1):.4f}")
