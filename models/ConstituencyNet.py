@@ -108,10 +108,16 @@ class ConstituencyNet(nn.Module):
             # Build pairwise comparison matrix
             final_out = torch.zeros(x.size(0), self.num_classes, self.num_classes).to(x.device)
             for i, classifier in enumerate(self.classifiers):
-                for j, class_idx in enumerate(classifier.class_list):
-                    for k, other_class_idx in enumerate(classifier.class_list):
-                        if j > k:
-                            final_out[:, class_idx, other_class_idx] += out_list[i][:, j]
+                subset = classifier.class_list
+                scores = out_list[i]
+
+                order = torch.argsort(scores, dim=1, descending=True)
+
+                for r1 in range(len(subset)):
+                    a = torch.tensor([subset[idx] for idx in order[:, r1].tolist()], device=x.device)
+                    for r2 in range(r1 + 1, len(subset)):
+                        b = torch.tensor([subset[idx] for idx in order[:, r2].tolist()], device=x.device)
+                        final_out[torch.arange(x.size(0)), a, b] += 1
             # Count wins
             final_out = torch.sum(final_out > (len(self.classifiers) / 2), dim=2)
 
@@ -192,5 +198,6 @@ if __name__ == "__main__":
     model = ConstituencyNet([constituencies], out_type='rp', num_classes=10)
     input = torch.randn(1, 3, 32, 32)
     output = model(input)
+    print(output)
     print(output.shape)
     print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
