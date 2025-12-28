@@ -166,6 +166,9 @@ class ConstituencyNet(nn.Module):
             tr_dl = torch.utils.data.DataLoader(tr_dataset, batch_size=64, shuffle=True)
             te_dl = torch.utils.data.DataLoader(te_dataset, batch_size=64, shuffle=False)
 
+            best_acc = 0.0
+            best_model = None
+
             for epoch in range(epochs):
                 pbar = tqdm.tqdm(tr_dl)
                 mean_loss = 0.0
@@ -197,6 +200,12 @@ class ConstituencyNet(nn.Module):
                 print(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
                 print(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
                 print(f"Classifier {i+1}/{self.num_constituencies} Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
+                epoch_acc = 100 * correct / total
+                if epoch_acc > best_acc:
+                    best_acc = epoch_acc
+                    best_model = classifier.state_dict()
+            if best_model is not None:
+                classifier.load_state_dict(best_model)
             classifier.to('cpu')
         print("Training complete.")
 
