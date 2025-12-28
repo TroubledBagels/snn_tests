@@ -112,6 +112,7 @@ if __name__ == '__main__':
     te_dl = torch.utils.data.DataLoader(te_ds, batch_size=batch_size, shuffle=False)
 
     correct = 0
+    model.to(device)
     model.eval()
     top2 = 0
     top3 = 0
