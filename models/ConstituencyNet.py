@@ -206,6 +206,7 @@ class ConstituencyNet(nn.Module):
                     best_model = classifier.state_dict()
             if best_model is not None:
                 classifier.load_state_dict(best_model)
+                print(f"Loaded best model for Classifier {i+1} with accuracy: {best_acc:.2f}%")
             classifier.to('cpu')
         print("Training complete.")
 
