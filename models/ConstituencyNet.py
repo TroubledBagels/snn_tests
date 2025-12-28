@@ -80,7 +80,10 @@ class ConstituencyNet(nn.Module):
         self.classifiers = [getattr(self, f"constituency_{i}") for i in range(len(constituency_structures))]
 
         if self.ann:
-            self.ann_layer = nn.Linear(self.num_classes * self.num_classes, self.num_classes)
+            total_num_outputs = 0
+            for classifier in self.classifiers:
+                total_num_outputs += classifier.num_outputs
+            self.ann_layer = nn.Linear(total_num_outputs, self.num_classes)
 
     def forward(self, x):
         if not x.is_cuda:
@@ -124,21 +127,9 @@ class ConstituencyNet(nn.Module):
             # Count wins
             final_out = torch.sum(final_out > (len(self.classifiers) / 2), dim=2)
         elif self.ann:
-            pairwise = torch.zeros(x.size(0), self.num_classes, self.num_classes).to(x.device)
-            for i, classifier in enumerate(self.classifiers):
-                subset = classifier.class_list
-                scores = out_list[i]
-
-                order = torch.argsort(scores, dim=1, descending=True)
-
-                for r1 in range(len(subset)):
-                    a = torch.tensor([subset[idx] for idx in order[:, r1].tolist()], device=x.device)
-                    for r2 in range(r1 + 1, len(subset)):
-                        b = torch.tensor([subset[idx] for idx in order[:, r2].tolist()], device=x.device)
-                        pairwise[torch.arange(x.size(0)), a, b] += 1
-
-            flat_pairwise = pairwise.view(x.size(0), -1)
-            final_out = self.ann_layer(flat_pairwise)
+            # Concatenate all classifier outputs
+            concat_out = torch.cat(out_list, dim=1)
+            final_out = self.ann_layer(concat_out)
 
         return final_out
 
