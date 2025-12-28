@@ -79,6 +79,9 @@ class ConstituencyNet(nn.Module):
             setattr(self, f"constituency_{i}", SmallConstituency(constituency_structures[i]))
         self.classifiers = [getattr(self, f"constituency_{i}") for i in range(len(constituency_structures))]
 
+        if self.ann:
+            self.ann_layer = nn.Linear(self.num_classes * self.num_classes, self.num_classes)
+
     def forward(self, x):
         if not x.is_cuda:
             out_list = []
@@ -120,6 +123,22 @@ class ConstituencyNet(nn.Module):
                         final_out[torch.arange(x.size(0)), a, b] += 1
             # Count wins
             final_out = torch.sum(final_out > (len(self.classifiers) / 2), dim=2)
+        elif self.ann:
+            pairwise = torch.zeros(x.size(0), self.num_classes, self.num_classes).to(x.device)
+            for i, classifier in enumerate(self.classifiers):
+                subset = classifier.class_list
+                scores = out_list[i]
+
+                order = torch.argsort(scores, dim=1, descending=True)
+
+                for r1 in range(len(subset)):
+                    a = torch.tensor([subset[idx] for idx in order[:, r1].tolist()], device=x.device)
+                    for r2 in range(r1 + 1, len(subset)):
+                        b = torch.tensor([subset[idx] for idx in order[:, r2].tolist()], device=x.device)
+                        pairwise[torch.arange(x.size(0)), a, b] += 1
+
+            flat_pairwise = pairwise.view(x.size(0), -1)
+            final_out = self.ann_layer(flat_pairwise)
 
         return final_out
 
@@ -182,6 +201,60 @@ class ConstituencyNet(nn.Module):
             classifier.to('cpu')
         print("Training complete.")
 
+    def train_ann(self, tr_ds, te_ds, epochs=3, lr=1e-3, device='cpu'):
+        if not self.ann:
+            print("ANN layer not defined in this model.")
+            return
+
+        print("Training ANN Layer")
+        criterion = nn.CrossEntropyLoss()
+        optimiser = torch.optim.Adam(self.ann_layer.parameters(), lr=lr)
+
+        tr_dl = torch.utils.data.DataLoader(tr_ds, batch_size=64, shuffle=True)
+        te_dl = torch.utils.data.DataLoader(te_ds, batch_size=64, shuffle=False)
+
+        self.ann_layer.to(device)
+        self.ann_layer.train()
+
+        for epoch in range(epochs):
+            pbar = tqdm.tqdm(tr_dl)
+            mean_loss = 0.0
+            for j, (data, labels) in enumerate(pbar):
+                data, labels = data.to(device), labels.to(device)
+                optimiser.zero_grad()
+                outputs = self.forward(data)
+                loss = criterion(outputs, labels)
+                mean_loss += loss.item()
+                loss.backward()
+                optimiser.step()
+                self.ann_layer.zero_grad()
+                pbar.set_description(f"ANN Epoch {epoch+1} Loss: {mean_loss/(j+1):.4f}")
+
+            qbar = tqdm.tqdm(te_dl)
+            correct = 0
+            total = 0
+            top2 = 0
+            top3 = 0
+            for j, (data, labels) in enumerate(qbar):
+                data, labels = data.to(device), labels.to(device)
+                outputs = self.forward(data)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                top2 += (labels.unsqueeze(1) == torch.topk(outputs, 2, dim=1).indices).any(dim=1).sum().item()
+                top3 += (labels.unsqueeze(1) == torch.topk(outputs, 3, dim=1).indices).any(dim=1).sum().item()
+                qbar.set_description(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+            print(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
+            print(f"ANN Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
+            print(f"ANN Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
+
+    def load_from_no_net(self, no_net_model):
+        with torch.no_grad():
+            for i, classifier in enumerate(self.classifiers):
+                no_net_classifers = no_net_model.classifiers
+                classifier.load_state_dict(no_net_classifers[i].state_dict())
+            print("Loaded weights from no-net model.")
+
 if __name__ == "__main__":
     constituencies = [
         [0, 1, 6, 7, 8],
@@ -195,7 +268,7 @@ if __name__ == "__main__":
         [1, 2, 6, 7, 8],
         [2, 3, 4, 8, 9]
     ]
-    model = ConstituencyNet([constituencies], out_type='rp', num_classes=10)
+    model = ConstituencyNet([constituencies], out_type='ann', num_classes=10)
     input = torch.randn(1, 3, 32, 32)
     output = model(input)
     print(output)

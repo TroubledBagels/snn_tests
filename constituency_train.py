@@ -65,6 +65,14 @@ if __name__ == '__main__':
         out_type=out_type,
         num_classes=10
     )
+
+    if out_type == "ann":
+        temp_model = CN.ConstituencyNet(
+            constituencies
+        )
+        model.load_from_no_net(temp_model)
+        model.train_ann(tr_ds, te_ds, epochs=epochs, lr=lr, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
