@@ -98,14 +98,14 @@ class ConstituencyNet(nn.Module):
                 classifier.eval()
                 stream = torch.cuda.Stream()
                 stream_list.append(stream)
-            out_list = []
+            out_list = [[] for _ in range(len(self.classifiers))]
             for i, classifier in enumerate(self.classifiers):
                 with torch.cuda.stream(stream_list[i]):
                     out = classifier(x)
                     if self.ann:
-                        out_list.append(out)
+                        out_list[i] = out
                     else:
-                        out_list.append(nn.Softmax(dim=1)(out))
+                        out_list[i] = nn.Softmax(dim=1)(out)
             torch.cuda.synchronize()
 
         if self.sum:
