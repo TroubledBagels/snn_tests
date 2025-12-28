@@ -218,7 +218,7 @@ class ConstituencyNet(nn.Module):
                 mean_loss += loss.item()
                 loss.backward()
                 optimiser.step()
-                self.ann_layer.zero_grad()
+                # self.ann_layer.zero_grad()
                 pbar.set_description(f"ANN Epoch {epoch+1} Loss: {mean_loss/(j+1):.4f}")
 
             qbar = tqdm.tqdm(te_dl)
