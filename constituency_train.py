@@ -126,4 +126,5 @@ if __name__ == '__main__':
         pbar.set_description(f"Accuracy: {100 * correct / len(te_ds):.2f}%")
     print(f"Final Test Accuracy: {100 * correct / len(te_ds):.2f}%")
 
-    torch.save(model.state_dict(), model_path)
+    if not inference_only and model_path != "":
+        torch.save(model.state_dict(), model_path)
