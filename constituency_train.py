@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument('-bs', type=int, default=64, help='Batch size for training')
     parser.add_argument('-i', action='store_true', default=False, help='Run inference only if set')
     parser.add_argument('-m', type=str, default="", help='Path to load model from for inference only and save model to')
+    parser.add_argument('-o', type=str, default="sum", help='Output type: sum, bin, ann, or rp')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     batch_size = args.bs
     inference_only = args.i
     model_path = args.m
+    out_type = args.o
     print(f"Parameters: epochs: {epochs}, lr: {lr}, batch_size: {batch_size}, inference_only: {inference_only}")
     augmentation_transform = torchvision.transforms.Compose([
         torchvision.transforms.RandomHorizontalFlip(),
@@ -58,7 +60,11 @@ if __name__ == '__main__':
         [2, 3, 4, 8, 9]
     ]
 
-    model = CN.ConstituencyNet(constituencies)
+    model = CN.ConstituencyNet(
+        constituencies,
+        out_type=out_type,
+        num_classes=10
+    )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
