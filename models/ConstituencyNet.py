@@ -224,6 +224,9 @@ class ConstituencyNet(nn.Module):
 
         self.ann_layer.to(device)
 
+        best_acc = 0.0
+        best_model = None
+
         for epoch in range(epochs):
             self.ann_layer.train()
             pbar = tqdm.tqdm(tr_dl)
@@ -258,6 +261,14 @@ class ConstituencyNet(nn.Module):
                 print(f"ANN Epoch {epoch+1} Test Accuracy: {100 * correct / total:.2f}%")
                 print(f"ANN Epoch {epoch+1} Test Top-2 Accuracy: {100 * top2 / total:.2f}%")
                 print(f"ANN Epoch {epoch+1} Test Top-3 Accuracy: {100 * top3 / total:.2f}%")
+                epoch_acc = 100 * correct / total
+                if epoch_acc > best_acc:
+                    best_acc = epoch_acc
+                    best_model = self.ann_layer.state_dict()
+        if best_model is not None:
+            self.ann_layer.load_state_dict(best_model)
+            print(f"Loaded best ANN model with accuracy: {best_acc:.2f}%")
+        print("ANN Training complete.")
 
     def load_from_no_net(self, no_net_model):
         with torch.no_grad():
