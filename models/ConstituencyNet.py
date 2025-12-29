@@ -88,11 +88,11 @@ class ConstituencyNet(nn.Module):
                 # nn.Linear(total_num_outputs, self.num_classes),
                 nn.Linear(total_num_outputs, 128),
                 nn.ReLU(),
-                nn.Dropout(0.2),
+                # nn.Dropout(0.2),
                 # nn.Linear(128, self.num_classes)
                 nn.Linear(128, 64),
                 nn.ReLU(),
-                nn.Dropout(0.2),
+                # nn.Dropout(0.2),
                 nn.Linear(64, self.num_classes)
             )
 
