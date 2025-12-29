@@ -84,7 +84,12 @@ class ConstituencyNet(nn.Module):
             for classifier in self.classifiers:
                 total_num_outputs += classifier.num_outputs
             print("Total number of outputs to ANN layer:", total_num_outputs)
-            self.ann_layer = nn.Linear(total_num_outputs, self.num_classes)
+            self.ann_layer = nn.Sequential(
+                # nn.Linear(total_num_outputs, self.num_classes),
+                nn.Linear(total_num_outputs, 128),
+                nn.ReLU(),
+                nn.Linear(128, self.num_classes)
+            )
 
     def forward(self, x):
         if not x.is_cuda:
