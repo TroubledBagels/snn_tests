@@ -274,7 +274,7 @@ class ConstituencyNet(nn.Module):
                 epoch_acc = 100 * correct / total
                 if epoch_acc > best_acc:
                     best_acc = epoch_acc
-                    best_model = self.ann_layer.state_dict()
+                    best_model = self.ann_layer.state_dict().copy()
         if best_model is not None:
             self.ann_layer.load_state_dict(best_model)
             print(f"Loaded best ANN model with accuracy: {best_acc:.2f}%")
