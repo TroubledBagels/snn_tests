@@ -31,13 +31,13 @@ if __name__ == '__main__':
     print(f"Parameters: epochs: {epochs}, lr: {lr}, batch_size: {batch_size}, inference_only: {inference_only}")
     augmentation_transform_flip = torchvision.transforms.Compose([
         torchvision.transforms.RandomHorizontalFlip(p=1.0),
-        torchvision.transforms.RandomCrop(32, padding=4),
+        # torchvision.transforms.RandomCrop(32, padding=4),
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
     ])
 
     augmentation_transform = torchvision.transforms.Compose([
-        torchvision.transforms.RandomCrop(32, padding=4),
+        # torchvision.transforms.RandomCrop(32, padding=4),
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
     ])
