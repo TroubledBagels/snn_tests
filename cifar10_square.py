@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     if linear_readout:
         model.train_output_layer(
-            tr_ds, te_ds, epochs=10, lr=1e-3, device=device
+            tr_ds, te_ds, epochs=50, lr=1e-4, device=device
         )
 
     # saved_weights = torch.load(model_dir, map_location=device)
